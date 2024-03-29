@@ -1,0 +1,64 @@
+.message-container {
+  overflow-y: scroll;
+  margin-bottom: 2em;
+}
+.message-container > div {
+  display: flex;
+  flex-direction: column;
+}
+.message-container .message {
+  max-width: 400px;
+  padding: 0.5em;
+  border-radius: 17px;
+  overflow-wrap: break-word;
+}
+.message-container .user {
+  background: #e5dfdf;
+  color: #393e46;
+  align-self: flex-end;
+}
+.message-container .bot {
+  background: #393e46;
+  color: #f7f7f7;
+  align-self: flex-start;
+}
+.message-container .options {
+  background: white;
+  display: flex;
+  align-items: center;
+}
+.message-container .options > div:first-child {
+  font-size: 1.3em;
+  margin: 0.7em 0.7em 0.9em 0.3em;
+  transform: rotate(90deg);
+}
+.message-container .options > div:first-child i {
+  color: #393e46;
+  animation: arrow-move 1.2s infinite;
+}
+@keyframes arrow-move {
+  0% {
+    transform: translateY(4px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(4px);
+  }
+}
+.message-container .options p {
+  padding: 0.5em;
+  margin-right: 0.8em;
+  background: #393e46;
+  color: #f7f7f7;
+  align-self: flex-start;
+  border-radius: 17px;
+}
+.message-container .options p:hover {
+  opacity: 0.7;
+  cursor: pointer;
+}
+.message-container .dummy-div {
+  padding: 0.5em 0;
+}/*# sourceMappingURL=Chats.css.map */
