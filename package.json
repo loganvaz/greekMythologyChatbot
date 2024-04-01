@@ -10,6 +10,7 @@
     "@types/node": "^16.18.91",
     "@types/react": "^18.2.73",
     "@types/react-dom": "^18.2.23",
+    "dotenv": "^16.4.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
@@ -40,5 +41,12 @@
       "last 1 safari version"
     ]
   },
-  "type": "module"
+  "type": "module",
+  "browser": {
+    "fs": false
+  },
+  "devDependencies": {
+    "path": "^0.12.7",
+    "process": "^0.11.10"
+  }
 }

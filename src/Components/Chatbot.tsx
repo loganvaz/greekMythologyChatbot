@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Chats from "../Chats/Chats";
 import "./Chatbot.css";
+import "../Helpers/Prompting";
+import "../Helpers/Story";
 
 interface ResponseBotObject {
   purpose: string;
@@ -21,6 +23,7 @@ const Chatbot: React.FC = () => {
 
   // setting next step when there's response and option click
   const setNextStep = (response: string) => {
+    console.log("response is ", response);
     setStep(prevState => prevState + 1);
     setSendUserResponse(response);
     let res = {

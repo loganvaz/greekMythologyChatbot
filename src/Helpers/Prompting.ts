@@ -41,3 +41,16 @@ Flow = [describe situation, user says what do, GPT says what happens and if we t
 
 
 */
+
+import OpenAI from 'openai';
+console.log("fetching process");
+const openai = new OpenAI({
+  apiKey: process.env.REACT_APP_GPT_API_KEY,
+  dangerouslyAllowBrowser: true
+})
+
+
+
+console.log("TODO - prompting")
+console.log("process.env is ", process.env);
+export {}
