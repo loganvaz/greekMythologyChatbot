@@ -1,0 +1,35 @@
+{
+    "entranceDescription": "You come across an island that seems bountiful enough. Throughout the island are heart-shaped fruits that look appealing to the eye, and you can see fires from the locals nearby.",
+    "primarySourceText": "we set foot on the land of the Lotus-eaters, who eat a flowery food. There we went on shore and drew water, and straightway my comrades took their meal by the swift ships. But when we had tasted food and drink, I sent forth some of my comrades to go and learn who the men were, who here ate bread upon the earth; two men I chose, sending with them a third as a herald. So they went straightway and mingled with the Lotus-eaters, and the Lotus-eaters did not plan death for my comrades, but gave them of the lotus to taste. And whosoever of them ate of the honey-sweet fruit of the lotus, had no longer any wish to bring back word or to return, but there they were fain to abide among the Lotus-eaters, feeding on the lotus, and forgetful of their homeward way. These men, therefore, I brought back perforce to the ships, weeping, and dragged them beneath the benches and bound them fast in the hollow ships; and I bade the rest of my trusty comrades to embark with speed on the swift ships, lest perchance anyone should eat of the lotus and forget his homeward way. So they went on board straightway and sat down upon the benches, and sitting well in order smote the grey sea with their oars",
+    "citation": "Homer. The Odyssey with an English Translation by A.T. Murray, PH.D. in two volumes. Cambridge, MA., Harvard University Press; London, William Heinemann, Ltd. 1919.",
+    "specialInstructions": "The food here is good but addicting. If you eat, you might become addicted.",
+    "components": [
+        {
+            "status": "friendly",
+            "fightingStrength": 1,
+            "intelligence": 1,
+            "agression": 0,
+            "explorerDescription": "You come across the locals who are quite friendly and ask you to dine with them, offering you their heart-shaped fruit.",
+            "exhibitsXenia": true,
+            "who": "lotus eaters",
+            "fightingDetails": "deads grow back when cut off",
+            "sampleBenefits": {
+                "food": {
+                    "amount": 10,
+                    "how": "the heart-shaped fruit. However, if you eat this you become addicted and it will take you a long time to want to leave."
+                },
+                "fame": {
+                    "amount": 2,
+                    "how": "If you escape the addiction of the lotus, you gain some fame"
+                },
+                "gold": {
+                    "amount": 0,
+                    "how": "The people here have no gold"
+                },
+                "shipQuality": {
+                    "amount": 0,
+                    "how": "The people here can't help repair the ship."
+                }
+            }
+        }]
+}
