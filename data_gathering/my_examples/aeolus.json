@@ -1,0 +1,36 @@
+{
+    "primarySourceText": "Then to the Aeolian isle we came, where dwelt Aeolus, son of Hippotas, dear to the immortal gods, in a floating island, and all around it is a wall of unbreakable bronze, and the cliff runs up sheer. [5] Twelve children of his, too, there are in the halls, six daughters and six sturdy sons, and he gave his daughters to his sons to wife. These, then, feast continually by their dear father and good mother, and before them lies boundless good cheer. [10] And the house, filled with the savour of feasting, resounds all about even in the outer court by day,1 and by night again they sleep beside their chaste wives on blankets and on corded bedsteads. To their city, then, and fair palace did we come, and for a full month he made me welcome and questioned me about each thing, [15] about Ilios, and the ships of the Argives, and the return of the Achaeans. And I told him all the tale in due order. But when I, on my part, asked him that I might depart and bade him send me on my way, he, too, denied me nothing, but furthered my sending. He gave me a wallet, made of the hide of an ox nine years old,2 which he flayed, [20] and therein he bound the paths of the blustering winds; for the son of Cronos had made him keeper of the winds, both to still and to rouse whatever one he will. And in my hollow ship he bound it fast with a bright cord of silver, that not a breath might escape, were it never so slight. [25] But for my furtherance he sent forth the breath of the West Wind to blow, that it might bear on their way both ships and men (Odyssey 10.1-10.29)",
+    "citation": "Homer. The Odyssey with an English Translation by A.T. Murray, PH.D. in two volumes. Cambridge, MA., Harvard University Press; London, William Heinemann, Ltd. 1919.",
+    "specialInstructions": "These people are friendly if you are respectful to them.",
+    "entranceDescription": "An island with a fair palace and a fair city, full of continual feasting and merriment.",
+    "components": [
+        {
+            "status": "friendly",
+            "fightingStrength": 5,
+            "intelligence": 1,
+            "agression": 1,
+            "explorerDescription": "You come to a mangificent palace, hearing the most amazing sounds of feasting and laughter as you get closer.",
+            "exhibitsXenia": true,
+            "who": "Aeolus and his twelve children",
+            "fightingDetails": "If you try to fight them, they will obliterate you.",
+            "sampleBenefits": {
+                "food": {
+                    "amount": 30,
+                    "how": "Accepting offer to feast with him"
+                },
+                "fame": {
+                    "amount": 5,
+                    "how": "Being able to say you visitted a god"
+                },
+                "gold": {
+                    "amount": 200,
+                    "how": "He bestows gifts like fine wallets (etc.) worth a lot"
+                },
+                "shipQuality": {
+                    "amount": 30,
+                    "how": "He blessed you with winds, increasing your ship quality"
+                }
+            }
+        }
+    ]
+}
