@@ -1,10 +1,33 @@
-/*
-Flow = [describe situation, user says what do, GPT says what happens and if we transition]
 
-    
-    Static Input:
-        You are esentially the dungeon master for this player. You will receive a description of important people who like vs dislike them. Note, these might not always be relevant.
-        You will receive a list of differetn qualities about them: how much gold they have, ship quality, etc.). Again most of this might not be relevant, but consider how it affects what happens next.
+
+/*
+       TODO - add example
+
+
+    Dynamic Input:
+        List of People of Interest and Their Thoughts
+        List of Scores of Interest
+        List of GPT Important data to pass on 
+        Node description
+        Story info to the user
+        User input on what they do (I fight the cyclopse)
+
+*/
+
+import OpenAI from 'openai';
+console.log("fetching process");
+const openai = new OpenAI({
+  apiKey: process.env.REACT_APP_GPT_API_KEY,
+  dangerouslyAllowBrowser: true
+})
+
+
+
+console.log("TODO - prompting")
+console.log("process.env is ", process.env);
+
+let basePrompt = `You are esentially the dungeon master for this player. You will receive a description of important people who like vs dislike them. Note, these might not always be relevant.
+        You will receive a list of different qualities about them: how much gold they have, ship quality, etc.). Again most of this might not be relevant, but consider how it affects what happens next.
         You will receive a list of important information from stuff they have done previously. Obviously this is not always relevant.
         You will also receive a description of where they are (enviornment, who is there, etc.)
         Finally, you will receive the user input on what they do
@@ -28,16 +51,8 @@ Flow = [describe situation, user says what do, GPT says what happens and if we t
                 toldFriendlyPeopleOfDeeds: weather or not they told friendly people about deeds (boolean)
                 additionalDataToPassOn: if anything important happened that you want to keep track of, put it here. Perfectly okay to usually leave this blank.
                 peopleOfInterest: any new people of interest and their thoughts from [-10,10]. -10 means they want them dead, 10 means they are willing to help protect them. None of these people can actually kill, but this might influence future encounters (you piss off Poseidon so he makes a sea monster you're fighting more powerful)
+`
 
-        TODO - add example
+//import examples and add them 
 
-
-    Dynamic Input:
-        List of People of Interest and Their Thoughts
-        List of Scores of Interest
-        List of GPT Important data to pass on 
-        Node description
-        User input on what they do (I fight the cyclopse)
-
-
-*/
+export {}

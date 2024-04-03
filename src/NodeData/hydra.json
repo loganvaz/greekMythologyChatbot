@@ -1,0 +1,94 @@
+{
+    "components": [
+        {
+            "status": "hostile",
+            "fightingStrength": 3,
+            "intelligence": 2,
+            "agression": 4,
+            "explorerDescription": "You come across a cave, just inbetween the swamplands and the fields where the cattle roam. A pungent smell clouds the air, and even the birds seem to hold their breath, as if frightened by death itself. Giant prints are eveywhere in the mud but you can't tell what",
+            "exhibitsXenia": false,
+            "who": "hydra",
+            "fightingDetails": "deads grow back when cut off",
+            "sampleBenefits": {
+                "food": {
+                    "amount": 20,
+                    "how": "cooking and eating the hydra"
+                },
+                "fame": {
+                    "amount": 20,
+                    "how": "slaying the hydra. Should only get 1-2 if they flee"
+                },
+                "gold": {
+                    "amount": 0,
+                    "how": "the hydra has no gold - as always if they think of a creative way (selling its head or something) they could get some"
+                },
+                "shipQuality": {
+                    "amount": 0,
+                    "how": "the hydra doesn't help repair ship"
+                }
+            }
+
+        },
+        {
+            "status": "hostile",
+            "fightingStrength": 1,
+            "intelligence": 1,
+            "agression": 4,
+            "explorerDescription": "You come across a cave, just inbetween the swamplands and the fields where the cattle roam. A pungent smell clouds the air, and even the birds seem to hold their breath, as if frightened by death itself. Along the edges of the swamp, you notice large, strange almost crab-like tracks in the sand.",
+            "exhibitsXenia": false,
+            "who": "a giant crab",
+            "fightingDetails": "deads grow back when cut off",
+            "sampleBenefits": {
+                "food": {
+                    "amount": 5,
+                    "how": "cooking and eating the crab"
+                },
+                "fame": {
+                    "amount": 2,
+                    "how": "slaying the crab. Get none if flee"
+                },
+                "gold": {
+                    "amount": 0,
+                    "how": "the crab has no gold - as always if they do something creative to get this, adjust it manually."
+                },
+                "shipQuality": {
+                    "amount": 0,
+                    "how": "the crab doesn't help repair ship"
+                }
+            }
+        },
+        {
+            "status": "friendly",
+            "fightingStrength": 0,
+            "intelligence": 3,
+            "agression": 0,
+            "explorerDescription": "You reach the farmland where a weary farmer tells you his cattle has been disapearing, what to what he is unsure",
+            "exhibitsXenia": true,
+            "who": "a local farmer",
+            "fightingDetails": "deads grow back when cut off",
+            "sampleBenefits": {
+                "food": {
+                    "amount": 2,
+                    "how": "He invites you for dinner - gain food if accept"
+                },
+                "fame": {
+                    "amount": 0,
+                    "how": "shouldn't really be way to gain fame from this"
+                },
+                "gold": {
+                    "amount": 0,
+                    "how": "he doesn't have any gifts to give you"
+                },
+                "shipQuality": {
+                    "amount": 0,
+                    "how": "he doesn't know how to repair a ship"
+                }
+            }
+        }
+    ], 
+    
+    "primarySourceText": "As a second labour he ordered him to kill the Lernaean hydra. That creature, bred in the swamp of Lerna, used to go forth into the plain and ravage both the cattle and the country. Now the hydra had a huge body, with nine heads, eight mortal, but the middle one immortal. So mounting a chariot driven by Iolaus, he came to Lerna, and having halted his horses, he discovered the hydra on a hill beside the springs of the Amymone, where was its den. By pelting it with fiery shafts he forced it to come out, and in the act of doing so he seized and held it fast. But the hydra wound itself about one of his feet and clung to him. Nor could he effect anything by smashing its heads with his club, for as fast as one head was smashed there grew up two. A huge crab also came to the help of the hydra by biting his foot.106 So he killed it, and in his turn called for help on Iolaus who, by setting fire to a piece of the neighboring wood and burning the roots of the heads with the brands, prevented them from sprouting. Having thus got the better of the sprouting heads, he chopped off the immortal head, and buried it, and put a heavy rock on it, beside the road that leads through Lerna to Elaeus. But the body of the hydra he slit up and dipped his arrows in the gall (Apollodorus 2.5.2)",
+    "citation": "Frazer, J. “Apollodorus, the Library 2.” APOLLODORUS, THE LIBRARY BOOK 2 - Theoi Classical Texts Library, www.theoi.com/Text/Apollodorus2.html. Accessed 1 Apr. 2024. ",
+    "entranceDescription": "You see an island, marred with swamplands but too containing enough grassland for cattle. The island is sparsely populated.",
+    "specialInstructions": "The farmer is in the cattle land. The hydra and the crab are near each other, if you explorer by swamp you encounter the crab description first. If you go by way of the grassland, you encounter the hydra first. Both are near enough encountering one might trigger the other one to come as well."
+}
