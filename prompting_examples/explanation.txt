@@ -1,0 +1,1 @@
+Basically, generate a sample prompt for GPT using COT 

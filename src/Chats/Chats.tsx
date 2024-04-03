@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import {MessagesInfo} from "../interfaces";
 import "./Chats.css";
 
 interface Props {
@@ -13,12 +14,7 @@ interface Props {
   optionClick: (ev: React.MouseEvent<HTMLElement>) => void;
 }
 
-interface MessagesInfo {
-  purpose?: string;
-  message: string;
-  options?: string[];
-  sender: string;
-}
+
 
 const intro_text = `Sing to me Muse of the Odyssey untold, of one of the many Greeks who on his way from that wasteland of Troy too encountered adventure
 He who witnessed Aphrodite steal from fair death her favored Paris, and too saw might Ares descend into battle. 
