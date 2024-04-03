@@ -23,6 +23,19 @@ export class OthersOpinions implements Opinions {
         this.whys = ["you are generally well liked by the crew", "doesn't have an opinion of you yet"];
     }
 
+    updateSinglePerson(person:string, newScore:number, whyAppend:string) {
+        const idx = this.entities.indexOf(person);
+        if (idx !== -1) {
+            this.opinions[idx] = clipScore(newScore);
+            this.whys[idx] += "; " + whyAppend;
+        }
+        else {
+            this.entities.push(person);
+            this.opinions.push(clipScore(newScore));
+            this.whys.push(whyAppend);
+        }
+    }
+
     updateEntities(newScores:number[], newEntities:string[], newWhys:string[]): void {
 
         newEntities.forEach((entityName, idx) => {
@@ -141,6 +154,15 @@ export class DynamicScoresOfInterest implements ScoresOfInterest{
         if (this.numCrew <0) return true;
         return false;
     }
+
+    getVisibleScores():VisibleScores {
+        return {
+            food: this.food,
+            shipQuality: this.shipQuality,
+            time: this.time,
+            numCrew: this.numCrew
+        }
+    }
 }
 
 export interface NodePart {
@@ -206,3 +228,19 @@ export class MyNode implements MyNodeInterface {
         return st;
     }
 };
+
+
+export interface GptExploringOutput {
+    thoughts:string
+    whatHappens:string,
+    isAlive:boolean,
+    crewStrength:number,
+    goldGain:number,
+    shipQuality:number,
+    timeChange:number,
+    famousDeedScore:number,
+    toldFriendlyPeopleOfDeeds:number,
+    additionalDataToPassOn:string,
+    peopleOfInterest:Opinions,
+    leftThisPlace:boolean
+}
