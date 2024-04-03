@@ -53,7 +53,7 @@ const basePromptExploring = `You are esentially the dungeon master for this play
                 toldFriendlyPeopleOfDeeds: weather or not they told friendly people about deeds (boolean)
                 additionalDataToPassOn: if anything important happened that you want to keep track of, put it here. Perfectly okay to usually leave this blank.
                 peopleOfInterest: any new people of interest and their thoughts from [-10,10]. -10 means they want them dead, 10 means they are willing to help protect them. None of these people can actually kill, but this might influence future encounters (you piss off Poseidon so he makes a sea monster you're fighting more powerful)
-
+                goesToNextIsland: whether or not they go to the next island
         Example (remember - your output should only be a json parseable string):
             Input:
                 ${sampleInput}
@@ -63,9 +63,27 @@ const basePromptExploring = `You are esentially the dungeon master for this play
                 `
 
 
-//import examples and add them 
+export const troySacrificePrompt = async (userInput:string):Promise<number> => {
+    const basePrompt = "Your goal is to determine if the user is sacrificing to the gods and if so how much. If they specify an amount, return that amount. If they say a lot, that means 50, a medium amount means 20; if they specify return that. Return only the numeber and nothing else: Example: Input: I sacrifice a lot to the gods before returning from Troy. Output: 50";
+    const completion = await openai.chat.completions.create({
+        model:"gpt-3.5-turbo",
+        messages: [{role:"system", content:basePrompt}, {role:"user", content:userInput}]
+    });
 
-export const onIslandFoundPrompt = async (userInput:string):Promise<string>=> {
+    const txt = completion.choices[0].message.content;
+    if (!txt) return 0;
+    try {
+        return parseInt(txt);
+    }
+    catch (err) {
+        console.log("Error is ", err);
+        return 0;
+    }
+
+}
+
+//import examples and add them 
+export const onIslandFoundPrompt = async (userInput:string):Promise<string> => {
     const basePrompt = "You are a simple parser. The person has three options - 1) stay where they are [stay], 2) explore the island [explore], 3) continue traveling [travel]. Your job is to tell me which one they choose. Say only explore, travel, stay, or can't tell [unknown]. You must return either unknown, stay, explore, or travel"
     const completion = await openai.chat.completions.create({
         model:"gpt-3.5-turbo",

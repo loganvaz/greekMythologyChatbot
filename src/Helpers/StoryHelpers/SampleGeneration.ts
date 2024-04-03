@@ -65,11 +65,30 @@ export const sampleOutputScyllaLuck15 = (numCrewBefore:number, peopleOfInterest:
             "entities": ${JSON.stringify(peopleOfInterest.entities)},
             "opinions": ${JSON.stringify(peopleOfInterest.opinions)},
             "whys": ${JSON.stringify(peopleOfInterest.whys)}
-        }
+        },
+        "goesToNextIsland": false
     }
 `
     // console.log("json thinking of returning is ", st);
     return  JSON.parse(st.trim());
+    // return {
+    //     "thoughts": "Rolled well (and Apollo is helping so we can increase the roll by 2) so can prevent the monster from killing six as normal. However, the ship is going to take damage from both her and the water. Preventing Scylla from taking a crew member hasn't been done before so that deserves some fame.",
+    //     "whatHappens": "Suddenly, a terrible six headed monster bursts from the top of the cliff, which you recognize as Scylla. You aim your bow at her and let lose a shot (guided by the favor of Apollo), forcing her to drop one of your men. However, you can do no further harm and as your crew member falls, he hits the ship, breaking it slightly.",
+    //     "isAlive": true,
+    //     "crewStrength": numCrewBefore-5,
+    //     "goldGain": 0,
+    //     "shipQuality": -10,
+    //     "timeChange": 0,
+    //     "famousDeedScore": 1,
+    //     "toldFriendlyPeopleOfDeeds": 0,
+    //     "additionalDataToPassOn": "The crew just lost several friends to Scylla and so is likely scared for the next few days",
+    //     "peopleOfInterest": {
+    //         "entities": peopleOfInterest.entities,
+    //         "opinions": peopleOfInterest.opinions,
+    //         "whys": peopleOfInterest.whys
+    //     },
+    //     "goesToNextIsland": false
+    // }
 }
 
 //now lets generate an example to put into the prompt

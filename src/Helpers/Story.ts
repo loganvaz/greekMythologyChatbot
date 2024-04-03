@@ -20,7 +20,7 @@ import lotus from "../NodeData/lotus.json";
 import sirens from "../NodeData/sirens.json";
 import troy from "../NodeData/troy.json";
 import {MyNode, NodePart, TravelCost, DynamicScoresOfInterest, OthersOpinions, MessagesInfo, VisibleScores} from "../interfaces";
-
+import {troySacrificePrompt, onIslandExplorePrompt, onIslandFoundPrompt} from "./StoryHelpers/Prompting"
 let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus,  sirens];
 console.log("group is ", group);
 
@@ -52,7 +52,7 @@ interface StoryProgression {
     updatedScores:VisibleScores
 }
 
-class Story {
+export class Story {
 
     //story progression
     nodes:MyNode[];
@@ -62,6 +62,8 @@ class Story {
     nodeIdx:number;
     gptStorage:string;
     atEntrance:boolean;
+    relevantMessagesIdx:number
+    internalFameScore:number
 
     //other things we're tracking
     
@@ -120,23 +122,164 @@ class Story {
 
         //set self to at entrance of node
         this.atEntrance = true;
+
+        //set releavnt messages to nothing so far
+        this.relevantMessagesIdx = 0;
+
+        //set internal fame to 0
+        this.internalFameScore = 0;
     }
 
-    // progressStory(messagesSoFar: MessagesInfo[]):StoryProgression {
-    //     //given the messages we have, transition into next state
+    async progressStory(messagesSoFar: MessagesInfo[]):Promise<StoryProgression> {
+        //Overall given the messages we have, transition into next state
+        console.log("last message is ", messagesSoFar[messagesSoFar.length-1].message);
 
-    //     //get info from gpt
+        //get info from gpt
+        //first are we at troy
+        if (this.nodeIdx === 0 && this.atEntrance) {
+            //figure out how much the user wants to sacrifice
+            let amount = await troySacrificePrompt(messagesSoFar[messagesSoFar.length-1].message);
+            this.myScores.changeGold(-amount);
+            if (amount >= 40) {
+                this.myScores.changeShipQuality(Math.floor((amount-40)/2));
+            }
 
-    //     //update nodeIndex if gpt says too
+            //figure out favors of gods
+            this.othersOpinions.updateSinglePerson("Poseidon", amount >30 ? 2 : Math.max(-3,Math.floor((amount-20)/2)) , "due to sacrifices of " + amount + " gold");
 
-    //     //update otehrsOpinions
+            //progress to next node
+            this.nodeIdx += 1;
+            this.atEntrance = true;
+            return {
+                outputTxt: `You begin your journey having sacrified ${amount} gold to the gods\n${this.storyProgression[this.nodeIdx].here.entranceDescription}`,
+                updatedScores: this.myScores.getVisibleScores()
+            }
+        }
+        else if (this.atEntrance) {
+            //figure out what to do on the island
+            let gptOutput = await onIslandFoundPrompt(messagesSoFar[messagesSoFar.length-1].message);
+            if (gptOutput === "explore") {
+                ; // TODO - should make it so don't have to send two requests
+            }
+            else if (gptOutput === "stay") {
+                this.myScores.changeTime(1);
+                this.myScores.changefood(2);
+                return {
+                    outputTxt: "You wait for the morrow. What would you like to do now?",
+                    updatedScores: this.myScores.getVisibleScores()
+                }
+            }
+            else { //its travel
+                this.nodeIdx += 1;
+                this.atEntrance = true;
+                //TODO - edge cost
+                this.myScores.changeTime(this.storyProgression[this.nodeIdx].continuance.time);
+                if (this.myScores.changefood(this.storyProgression[this.nodeIdx].continuance.food)) {
+                    return {
+                        outputTxt: "You have run out of food and have died. Please start again",
+                        updatedScores: this.myScores.getVisibleScores()
+                    }
+                
+                };
+                if (this.myScores.changeNumCrew(this.storyProgression[this.nodeIdx].continuance.shipQuality)) {
+                    return {
+                        outputTxt: "All members of your crew have died. Please start again",
+                        updatedScores: this.myScores.getVisibleScores()
+                    }
+                
+                };
+                this.relevantMessagesIdx = messagesSoFar.length-1;
+                return {
+                    outputTxt: "You continue on your voyage...",
+                    updatedScores: this.myScores.getVisibleScores()
+                }
+            }
+        }
 
-    //     //update GPT memory log
+        const relevantMessages = messagesSoFar.slice(this.relevantMessagesIdx);
+        const gptResponse = await onIslandExplorePrompt(this.othersOpinions, this.myScores, this.storyProgression[this.nodeIdx].here, relevantMessages, this.gptStorage, Math.ceil(Math.random()*20));
+        if (!gptResponse) {
+            return {
+                outputTxt: "The Muses are out of services right now. Please state what you tried to do again",
+                updatedScores: this.myScores.getVisibleScores()
+            
+            }
+        }
+        this.othersOpinions.updateEntities(gptResponse.peopleOfInterest.opinions, gptResponse.peopleOfInterest.entities , gptResponse.peopleOfInterest.whys);
+        this.gptStorage += gptResponse.additionalDataToPassOn;
+        if (!gptResponse.isAlive) {
+            return {
+                outputTxt: gptResponse.whatHappens + "You have died. Please start again",
+                updatedScores: this.myScores.getVisibleScores()
+            }
+        }
 
-    //     //figure out if we died and update scores
+        //update what you did here
+        this.myScores.changeTime(this.storyProgression[this.nodeIdx].continuance.time);
+        const amountTold = gptResponse.toldFriendlyPeopleOfDeeds;
+        this.internalFameScore += this.myScores.fame * (amountTold/10);
+        this.myScores.changeFame(gptResponse.famousDeedScore);
 
-    //     //return the next story progression
-    // }
+        if (this.myScores.changefood(this.storyProgression[this.nodeIdx].continuance.food)) {
+            return {
+                outputTxt: gptResponse.whatHappens + "You have run out of food and have died. Please start again",
+                updatedScores: this.myScores.getVisibleScores()
+            }
+        
+        };
+        if (this.myScores.changeNumCrew(this.storyProgression[this.nodeIdx].continuance.shipQuality)) {
+            return {
+                outputTxt: gptResponse.whatHappens + "All members of your crew have died. Please start again",
+                updatedScores: this.myScores.getVisibleScores()
+            }
+        };
+
+        if (this.myScores.changeShipQuality(this.storyProgression[this.nodeIdx].continuance.shipQuality)) {
+            return {
+                outputTxt: gptResponse.whatHappens + "Your ship has been destroyed. Please start again",
+                updatedScores: this.myScores.getVisibleScores()
+            }
+        }
+        
+        if (gptResponse.goesToNextIsland) {
+            this.nodeIdx += 1;
+            this.atEntrance = true;
+            
+            
+            this.relevantMessagesIdx = messagesSoFar.length-1;
+
+            //TODO - edge cost
+            this.myScores.changeTime(this.storyProgression[this.nodeIdx].continuance.time);
+            if (this.myScores.changefood(this.storyProgression[this.nodeIdx].continuance.food)) {
+                return {
+                    outputTxt: "You have run out of food and have died. Please start again",
+                    updatedScores: this.myScores.getVisibleScores()
+                }
+            
+            };
+            if (this.myScores.changeNumCrew(this.storyProgression[this.nodeIdx].continuance.shipQuality)) {
+                return {
+                    outputTxt: "All members of your crew have died. Please start again",
+                    updatedScores: this.myScores.getVisibleScores()
+                }
+            
+            };
+            this.relevantMessagesIdx = messagesSoFar.length-1;
+            return {
+                outputTxt: gptResponse.whatHappens + `\nYou continue on your voyage...\n${this.storyProgression[this.nodeIdx].here.entranceDescription}`,
+                updatedScores: this.myScores.getVisibleScores()
+            }
+        }
+        this.atEntrance = false;
+        return {
+            outputTxt: gptResponse.whatHappens,
+            updatedScores: this.myScores.getVisibleScores()
+        }
+
+        //figure out if we died and update scores
+
+        //return the next story progression
+    }
 
     /*
         user prompt:
