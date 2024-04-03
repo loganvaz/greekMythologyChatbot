@@ -33,38 +33,45 @@ const basePromptExploring = `You are esentially the dungeon master for this play
         You will receive a list of important information from stuff they have done previously. Obviously this is not always relevant.
         You will also receive a description of where they are (enviornment, who is there, etc.)
         Finally, you will receive the user input on what they do
+        Remember, take each thing one step at a time. Don't explore the entire node, introduce them to a friend/monster then see what they do.
 
 
         Basline infomration:
             A plate crafted by Hephaestus is worth 10 gold.
             Killing the Nemean Lion is a famousDeedScore increase of 5. Killing a bunch of random cyclops would be like a 3. If a creature has its own myth story, it's worth more. If it's meeting a god, the increase should usually be about 2. 
 
-        Your task from here is to the following:
-            1) Think about how all these would interact. If they are low on gold and food and the people are good, they will receive help. If they are beseiged by giants but Hermes is on their side, perhaps they'll be able to deceive their way out of the situation.
-            2) Describe what happens. For instance: the cyclops you foolishly chose to fight barehanded kills and eats you. Or the giant hears your sad song, and because Aphrodite favors you she moves his heart into taking mercy on you.
-            3) Describe if they transition to a new state. This should be a string that says "same" if they stay in the same place "deeper" if they go deeper into the enviornment they are in, or "leave" if they are leaving on ship.
-            4) Describe import features about the change in their situation
-                isAlive: boolean if they died or not
-                crewStrength: what the new crew strength is (0-20)
-                goldGain: the amout of gold/valuables they have gained
-                shipQuality: the new ship quality after this encounter
-                timeChange: the amount of time that has changed in days. If it's less than a day, should be 0.
-                famousDeedsScore: the amount (1-5) that their heroic fame has increased. This is from stuff like killing monsters or meeting gods.
-                toldFriendlyPeopleOfDeeds: weather or not they told friendly people about deeds (boolean)
-                additionalDataToPassOn: if anything important happened that you want to keep track of, put it here. Perfectly okay to usually leave this blank.
-                peopleOfInterest: any new people of interest and their thoughts from [-10,10]. -10 means they want them dead, 10 means they are willing to help protect them. None of these people can actually kill, but this might influence future encounters (you piss off Poseidon so he makes a sea monster you're fighting more powerful)
-                goesToNextIsland: whether or not they go to the next island
-        Example (remember - your output should only be a json parseable string):
+        Yor task is to return the following:
+        {
+            "thoughts":string your thought process on what happened
+            "whatHappens":string The description to tell the player about what happene
+            "isAlive": boolean that is true if the player is still alive
+            "crewStrength":number the new crew strength
+            "goldGain":number the amount of gold the player gained
+            "shipQuality":number the change in ship quality (damage is negative, assistance is positive)
+            "timeChange": number, the amount of time that has changed,
+            "famousDeedScore": number, how the famousDeedScore changed,
+            "toldFriendlyPeopleOfDeeds": number, how famous the people they told of deeds are (0 if didn't tell anyone),
+            "additionalDataToPassOn": string, what you want passed to you next time,
+            "peopleOfInterest": {
+                "entities": string[] name of important entities (people, gods, monsters, etc.), if a name already exists use the same on
+                "opinions": number[] the opinions of each of these people [-10,10] -10 means they want them dead, 10 means they are willing to help protect them
+                "whys": string[] why they have that thought
+            },
+            "leftThisPlace": whether or not they left this place
+        }
+
+        Example:
             Input:
                 ${sampleInput}
             
             Output:
                 ${sampleOutput}
-                `
+               
+        Remeber, your entire response should be a json string that can be parsed with JSON.parse in js. Make sure you return a dictionary like above that is json parseable `
 
 
 export const troySacrificePrompt = async (userInput:string):Promise<number> => {
-    const basePrompt = "Your goal is to determine if the user is sacrificing to the gods and if so how much. If they specify an amount, return that amount. If they say a lot, that means 50, a medium amount means 20; if they specify return that. Return only the numeber and nothing else: Example: Input: I sacrifice a lot to the gods before returning from Troy. Output: 50";
+    const basePrompt = "Your goal is to determine if the user is sacrificing to the gods and if so how much. If they specify an amount, return that amount. If they say a lot, that means 50, a medium amount means 20; if they specify return that. Return only the numeber and nothing else. If they just typed a number return what they typed: Example: Input: I sacrifice a lot to the gods before returning from Troy. Output: 50";
     const completion = await openai.chat.completions.create({
         model:"gpt-3.5-turbo",
         messages: [{role:"system", content:basePrompt}, {role:"user", content:userInput}]
@@ -94,7 +101,7 @@ export const onIslandFoundPrompt = async (userInput:string):Promise<string> => {
     if (txt.includes("stay")) return "stay";
     if (txt.includes("explore")) return "explore";
     if (txt.includes("travel")) return "travel";
-    return "unknown";
+    return "explore";
 }
 
 
@@ -105,8 +112,9 @@ export const onIslandExplorePrompt = async (othersOpinions:Opinions, currentScor
         model:"gpt-3.5-turbo",
         messages: [{role:"system", content:basePromptExploring}, {role:"user", content:thisInput}]
     });
-    console.log("completion is ", completion);
+
     if (completion.choices[0].message.content) {
+        console.log("msg content is ", completion.choices[0].message.content);
         return JSON.parse(completion.choices[0].message.content) as GptExploringOutput;
     }
     else {

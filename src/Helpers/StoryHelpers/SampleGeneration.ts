@@ -23,7 +23,7 @@ import scylla from "../../NodeData/charybdis_scylla.json";
             based on the recent chat we know the giant is hostile becaue you attacked him
         data:
             whatHappens: string to display to user on what happens
-            isAlive: whether the user is still alive 
+            isAlive: whether the user is still alive.
             crewStrength: what the new crew strength is (0-20)
             goldGain: the amout of gold/valuables they have gained
             shipQuality: the new ship quality after this encounter
@@ -66,7 +66,7 @@ export const sampleOutputScyllaLuck15 = (numCrewBefore:number, peopleOfInterest:
             "opinions": ${JSON.stringify(peopleOfInterest.opinions)},
             "whys": ${JSON.stringify(peopleOfInterest.whys)}
         },
-        "goesToNextIsland": false
+        "leftThisPlace": false
     }
 `
     // console.log("json thinking of returning is ", st);
@@ -87,7 +87,7 @@ export const sampleOutputScyllaLuck15 = (numCrewBefore:number, peopleOfInterest:
     //         "opinions": peopleOfInterest.opinions,
     //         "whys": peopleOfInterest.whys
     //     },
-    //     "goesToNextIsland": false
+    //     "leftThisPlace": false
     // }
 }
 
@@ -142,9 +142,9 @@ const recentChatHistory:MessagesInfo[] = [
 const infoToPass = "The ships have been badly damaged by a storm and are prone to breaking. The men are eager to get home and have extra trust in the player after escaping the giants";
 const luck = 15;
 export const sampleInput = generateInput(othersOpinions, currentScores, new MyNode(scylla.entranceDescription, scylla.components, scylla.primarySourceText, scylla.specialInstructions,scylla.citation) , recentChatHistory, infoToPass, luck);
-console.log(sampleInput)
+// console.log(sampleInput)
 
 export const sampleOutput = sampleOutputScyllaLuck15(numCrew, othersOpinions)
-console.log(sampleOutput)
+// console.log(sampleOutput)
 
 

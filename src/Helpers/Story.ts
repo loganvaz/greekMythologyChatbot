@@ -19,9 +19,9 @@ import lamus from "../NodeData/lamus.json";
 import lotus from "../NodeData/lotus.json";
 import sirens from "../NodeData/sirens.json";
 import troy from "../NodeData/troy.json";
-import {MyNode, NodePart, TravelCost, DynamicScoresOfInterest, OthersOpinions, MessagesInfo, VisibleScores} from "../interfaces";
+import {MyNode, NodePart, TravelCost, DynamicScoresOfInterest, OthersOpinions, MessagesInfo, VisibleScores, MyNodeInterface} from "../interfaces";
 import {troySacrificePrompt, onIslandExplorePrompt, onIslandFoundPrompt} from "./StoryHelpers/Prompting"
-let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus,  sirens];
+let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus, sirens];
 console.log("group is ", group);
 
 
@@ -70,18 +70,22 @@ export class Story {
 
     constructor() {
         //first, we need to load in the relevant nodes
-        group = shuffle(group);
-        group.unshift(troy);
-        this.nodes = group.map((g) => {
+
+        const processInputNodeJson = (g:MyNodeInterface):MyNode => {
             g.components = g.components.map((c) => {
                 c.status = ["friendly", "hostile", "nuetral"].includes(c.status) ? c.status : "nuetral";
                 return c as NodePart;
             })
             return new MyNode(g.entranceDescription, g.components, g.primarySourceText, g.specialInstructions, g.citation)
-        });
 
-        //for now, let's explore sequentially but randomly
+        }
+        group = shuffle(group);
+        // group.unshift(troy);
+        this.nodes = group.map((g) => { return processInputNodeJson(g); });
         this.nodes = shuffle(this.nodes);
+        this.nodes = [processInputNodeJson(troy), ...this.nodes];
+        //for now, let's explore sequentially but randomly
+        
 
         //construct our dummy linked list
         //TODO - these need to interact
@@ -128,15 +132,21 @@ export class Story {
 
         //set internal fame to 0
         this.internalFameScore = 0;
+
+        console.log("this.nodes is ", this.nodes);
     }
 
     async progressStory(messagesSoFar: MessagesInfo[]):Promise<StoryProgression> {
+        console.log("messages so far is ", messagesSoFar);
         //Overall given the messages we have, transition into next state
         console.log("last message is ", messagesSoFar[messagesSoFar.length-1].message);
+
+        console.log("node idx is ", this.nodeIdx);
 
         //get info from gpt
         //first are we at troy
         if (this.nodeIdx === 0 && this.atEntrance) {
+            console.log("Troy consideration");
             //figure out how much the user wants to sacrifice
             let amount = await troySacrificePrompt(messagesSoFar[messagesSoFar.length-1].message);
             this.myScores.changeGold(-amount);
@@ -150,14 +160,17 @@ export class Story {
             //progress to next node
             this.nodeIdx += 1;
             this.atEntrance = true;
+            console.log("this node idx is ", this.nodeIdx, "node is ", this.nodes[this.nodeIdx].getNodeString());
             return {
-                outputTxt: `You begin your journey having sacrified ${amount} gold to the gods\n${this.storyProgression[this.nodeIdx].here.entranceDescription}`,
+                outputTxt: `You begin your journey having sacrified ${amount} gold to the gods\n${this.nodes[this.nodeIdx].entranceDescription}.\n Would you like to stay in your ships, travel onwards, or explore the island?`,
                 updatedScores: this.myScores.getVisibleScores()
             }
         }
+        if (this.nodes[this.nodeIdx].entranceDescription.includes("Charybdis")) this.atEntrance = false;
         else if (this.atEntrance) {
             //figure out what to do on the island
             let gptOutput = await onIslandFoundPrompt(messagesSoFar[messagesSoFar.length-1].message);
+            console.log("gpt output is ", gptOutput);
             if (gptOutput === "explore") {
                 ; // TODO - should make it so don't have to send two requests
             }
@@ -190,7 +203,7 @@ export class Story {
                 };
                 this.relevantMessagesIdx = messagesSoFar.length-1;
                 return {
-                    outputTxt: "You continue on your voyage...",
+                    outputTxt: "You continue on your voyage...\n"+this.storyProgression[this.nodeIdx].here.entranceDescription+"\nWould you like to stay in your ships, travel onwards, or explore the island?",
                     updatedScores: this.myScores.getVisibleScores()
                 }
             }
@@ -198,6 +211,7 @@ export class Story {
 
         const relevantMessages = messagesSoFar.slice(this.relevantMessagesIdx);
         const gptResponse = await onIslandExplorePrompt(this.othersOpinions, this.myScores, this.storyProgression[this.nodeIdx].here, relevantMessages, this.gptStorage, Math.ceil(Math.random()*20));
+        console.log("gptResponse is ", gptResponse);
         if (!gptResponse) {
             return {
                 outputTxt: "The Muses are out of services right now. Please state what you tried to do again",
@@ -241,7 +255,7 @@ export class Story {
             }
         }
         
-        if (gptResponse.goesToNextIsland) {
+        if (gptResponse.leftThisPlace) {
             this.nodeIdx += 1;
             this.atEntrance = true;
             
@@ -266,7 +280,7 @@ export class Story {
             };
             this.relevantMessagesIdx = messagesSoFar.length-1;
             return {
-                outputTxt: gptResponse.whatHappens + `\nYou continue on your voyage...\n${this.storyProgression[this.nodeIdx].here.entranceDescription}`,
+                outputTxt: gptResponse.whatHappens + `\nYou continue on your voyage...\n${this.storyProgression[this.nodeIdx].here.entranceDescription+"\nWould you like to stay in your ships, travel onwards, or explore the island?"}`,
                 updatedScores: this.myScores.getVisibleScores()
             }
         }

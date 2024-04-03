@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Dispatch, SetStateAction } from "react";
 import {MessagesInfo} from "../interfaces";
 import "./Chats.css";
 
@@ -12,6 +12,8 @@ interface Props {
   };
   sendUserResponse: string;
   optionClick: (ev: React.MouseEvent<HTMLElement>) => void;
+  messages: MessagesInfo[];
+  setMessages: Dispatch<SetStateAction<MessagesInfo[]>>;
 }
 
 
@@ -22,9 +24,17 @@ Who scaled the walls of Troy, sacking that once so glorious city before beginnin
 But tell me brave hero, do you plan to return home or else to make sacrifies to the gods?
 `
 
+export const allIntroMessages = intro_text.split("\n").filter((msg) => msg.trim().length).map((msg) => {
+  return {
+    purpose: "introduction",
+    message: msg, 
+    sender: "bot"
+  }
+})
+
 
 const Chats: React.FC<Props> = props => {
-  const [messages, setMessages] = useState<MessagesInfo[]>([]);
+  // const [messages, setMessages] = useState<MessagesInfo[]>(props.messages);
   const dummyRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -32,45 +42,49 @@ const Chats: React.FC<Props> = props => {
   const botMessages = props.botResponse;
   const userMessages = props.sendUserResponse
 
-  // stacking up messages
-  useEffect(() => {
-    if (messages.length === 0) {
+  // useEffect(() => {
+  //   console.log("using onMsgChange to " + messages);
+  //   // props.onMsgChange(messages);
+  // }, [messages]);
 
-      const allIntroMessages = intro_text.split("\n").filter((msg) => msg.trim().length).map((msg) => {
-        return {
-          purpose: "introduction",
-          message: msg, 
-          sender: "bot"
-        }
-      })
-      setMessages(allIntroMessages);
+  // stacking up messages
+
+
+  useEffect(() => {
+    console.log("MESSAGES IN CHATS is ", props.messages);
+    if (props.messages.length === 0) {
+      props.setMessages(allIntroMessages);
     } else {
-      let tempArray = [...messages];
+      const lastMsg = props.messages[props.messages.length-1].message.trim();
+      if (props.sendUserResponse.trim() === lastMsg) return;
+      console.log("adding user response of ", props.sendUserResponse, "last msg is ", lastMsg, "equality is ", lastMsg === props.sendUserResponse);
+      let tempArray = [...props.messages];
       tempArray.push({ message: props.sendUserResponse, sender: "user" });
-      setMessages(tempArray);
+      props.setMessages(tempArray);
 
       setTimeout(() => {
+        console.log("props.botResponse is", props.botResponse);
         let temp2 = [...tempArray];
         temp2.push(props.botResponse);
-        setMessages(temp2);
-      }, 1000);
+        props.setMessages(temp2);
+      }, 5000);
     }
   }, [userMessages, botMessages]); // I think this error is wrong
 
   // enable autoscroll after each message except for the intro
   useEffect(() => {
-    if (dummyRef && dummyRef.current && bodyRef && bodyRef.current && messages.filter((msg) => msg.sender === "user").length) {
+    if (dummyRef && dummyRef.current && bodyRef && bodyRef.current && props.messages.filter((msg) => msg.sender === "user").length) {
       bodyRef.current.scrollTo({
         top: dummyRef.current.offsetTop,
         behavior: "smooth"
       });
     }
-  }, [messages]);
+  }, [props.messages]);
 
   return (
     <div className="message-container" ref={bodyRef}>
-      {messages.map(chat => (
-        <div key={chat.message}>
+      {props.messages.map((chat,idx) => (
+        <div key={chat.message +idx}>
           <div className={`message ${chat.sender}`}>
             <p>{chat.message}</p>
           </div>
@@ -83,7 +97,7 @@ const Chats: React.FC<Props> = props => {
                 <p
                   onClick={e => props.optionClick(e)}
                   data-id={option}
-                  key={option}
+                  key={option + Math.random()}
                 >
                   {option}
                 </p>

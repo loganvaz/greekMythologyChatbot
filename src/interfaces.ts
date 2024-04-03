@@ -242,5 +242,5 @@ export interface GptExploringOutput {
     toldFriendlyPeopleOfDeeds:number,
     additionalDataToPassOn:string,
     peopleOfInterest:Opinions,
-    goesToNextIsland:boolean
+    leftThisPlace:boolean
 }
