@@ -206,3 +206,18 @@ export class MyNode implements MyNodeInterface {
         return st;
     }
 };
+
+
+export interface GptExploringOutput {
+    thoughts:string
+    whatHappens:string,
+    isAlive:boolean,
+    crewStrength:number,
+    goldGain:number,
+    shipQuality:number,
+    timeChange:number,
+    famousDeedScore:number,
+    toldFriendlyPeopleOfDeeds:number,
+    additionalDataToPassOn:string,
+    peopleOfInterest:Opinions
+}

@@ -15,6 +15,9 @@
 */
 
 import OpenAI from 'openai';
+import { sampleInput, sampleOutput } from './SampleGeneration';
+import { Opinions,ScoresOfInterest, MessagesInfo,MyNode, GptExploringOutput } from '../../interfaces';
+import {generateInput} from "./InputPromptGeneration";
 console.log("fetching process");
 const openai = new OpenAI({
   apiKey: process.env.REACT_APP_GPT_API_KEY,
@@ -22,11 +25,10 @@ const openai = new OpenAI({
 })
 
 
-
 console.log("TODO - prompting")
 console.log("process.env is ", process.env);
 
-let basePrompt = `You are esentially the dungeon master for this player. You will receive a description of important people who like vs dislike them. Note, these might not always be relevant.
+const basePromptExploring = `You are esentially the dungeon master for this player. You will receive a description of important people who like vs dislike them. Note, these might not always be relevant.
         You will receive a list of different qualities about them: how much gold they have, ship quality, etc.). Again most of this might not be relevant, but consider how it affects what happens next.
         You will receive a list of important information from stuff they have done previously. Obviously this is not always relevant.
         You will also receive a description of where they are (enviornment, who is there, etc.)
@@ -51,8 +53,46 @@ let basePrompt = `You are esentially the dungeon master for this player. You wil
                 toldFriendlyPeopleOfDeeds: weather or not they told friendly people about deeds (boolean)
                 additionalDataToPassOn: if anything important happened that you want to keep track of, put it here. Perfectly okay to usually leave this blank.
                 peopleOfInterest: any new people of interest and their thoughts from [-10,10]. -10 means they want them dead, 10 means they are willing to help protect them. None of these people can actually kill, but this might influence future encounters (you piss off Poseidon so he makes a sea monster you're fighting more powerful)
-`
+
+        Example (remember - your output should only be a json parseable string):
+            Input:
+                ${sampleInput}
+            
+            Output:
+                ${sampleOutput}
+                `
+
 
 //import examples and add them 
 
-export {}
+export const onIslandFoundPrompt = async (userInput:string):Promise<string>=> {
+    const basePrompt = "You are a simple parser. The person has three options - 1) stay where they are [stay], 2) explore the island [explore], 3) continue traveling [travel]. Your job is to tell me which one they choose. Say only explore, travel, stay, or can't tell [unknown]. You must return either unknown, stay, explore, or travel"
+    const completion = await openai.chat.completions.create({
+        model:"gpt-3.5-turbo",
+        messages: [{role:"system", content:basePrompt}, {role:"user", content:userInput}]
+    });
+    const txt = completion.choices[0].message.content;
+    if (!txt) return "unknown";
+    if (txt.includes("stay")) return "stay";
+    if (txt.includes("explore")) return "explore";
+    if (txt.includes("travel")) return "travel";
+    return "unknown";
+}
+
+
+export const onIslandExplorePrompt = async (othersOpinions:Opinions, currentScores: ScoresOfInterest, node:MyNode, recentChatHistory:MessagesInfo[], infoToPass:string, luck:number):Promise<GptExploringOutput|null> => {
+    const thisInput = generateInput(othersOpinions, currentScores, node, recentChatHistory, infoToPass, luck);
+    //send prompt to gpt using baseprompt as sys prompt and this input as my prompt
+    const completion = await openai.chat.completions.create({
+        model:"gpt-3.5-turbo",
+        messages: [{role:"system", content:basePromptExploring}, {role:"user", content:thisInput}]
+    });
+    console.log("completion is ", completion);
+    if (completion.choices[0].message.content) {
+        return JSON.parse(completion.choices[0].message.content) as GptExploringOutput;
+    }
+    else {
+        return null;
+    }
+    
+}

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Chats from "../Chats/Chats";
 import "./Chatbot.css";
-import "../Helpers/Prompting";
+import "../Helpers/StoryHelpers/Prompting";
 // import "../Helpers/Story";
-import "../Helpers/SampleGeneration";
+import "../Helpers/StoryHelpers/SampleGeneration";
 interface ResponseBotObject {
   purpose: string;
   message: string;
