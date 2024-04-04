@@ -98,9 +98,11 @@ export interface VisibleScores {
     shipQuality:number;
     time:number;
     numCrew:number;
+    gold:number;
+    fame:number;
 }
 
-export interface ScoresOfInterest {
+export interface ScoresOfInterest extends VisibleScores {
     fame:number;
     food:number;
     gold:number;
@@ -121,9 +123,8 @@ export class DynamicScoresOfInterest implements ScoresOfInterest{
         this.fame = 0; this.food = 100; this.gold = 100; this.shipQuality = 100; this.time = 0; this.numCrew = 20;
     }
 
-    //each of these change functions will change and return if something goes wrong
     changefood(amountChange:number):boolean {
-        this.food -= amountChange;
+        this.food += amountChange;
         if (this.food <0) return true;
         return false;
     }
@@ -160,7 +161,9 @@ export class DynamicScoresOfInterest implements ScoresOfInterest{
             food: this.food,
             shipQuality: this.shipQuality,
             time: this.time,
-            numCrew: this.numCrew
+            numCrew: this.numCrew,
+            gold:this.gold,
+            fame:this.fame
         }
     }
 }
@@ -236,8 +239,9 @@ export interface GptExploringOutput {
     isAlive:boolean,
     crewStrength:number,
     goldGain:number,
-    shipQuality:number,
+    shipQualityChange:number,
     timeChange:number,
+    foodChange:number,
     famousDeedScore:number,
     toldFriendlyPeopleOfDeeds:number,
     additionalDataToPassOn:string,

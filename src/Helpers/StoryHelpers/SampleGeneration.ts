@@ -54,9 +54,9 @@ export const sampleOutputScyllaLuck15 = (numCrewBefore:number, peopleOfInterest:
         "thoughts": "Rolled well (and Apollo is helping so we can increase the roll by 2) so can prevent the monster from killing six as normal. However, the ship is going to take damage from both her and the water. Preventing Scylla from taking a crew member hasn't been done before so that deserves some fame.",
         "whatHappens": "Suddenly, a terrible six headed monster bursts from the top of the cliff, which you recognize as Scylla. You aim your bow at her and let lose a shot (guided by the favor of Apollo), forcing her to drop one of your men. However, you can do no further harm and as your crew member falls, he hits the ship, breaking it slightly.",
         "isAlive": true,
-        "crewStrength": ${numCrewBefore-5},
+        "crewStrength": -5,
         "goldGain": 0,
-        "shipQuality": -10,
+        "shipQualityChange": -10,
         "timeChange": 0,
         "famousDeedScore": 1,
         "toldFriendlyPeopleOfDeeds": 0,
@@ -66,6 +66,7 @@ export const sampleOutputScyllaLuck15 = (numCrewBefore:number, peopleOfInterest:
             "opinions": ${JSON.stringify(peopleOfInterest.opinions)},
             "whys": ${JSON.stringify(peopleOfInterest.whys)}
         },
+        "foodChange": 0,
         "leftThisPlace": false
     }
 `

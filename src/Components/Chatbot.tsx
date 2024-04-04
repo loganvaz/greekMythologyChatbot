@@ -4,8 +4,9 @@ import "./Chatbot.css";
 import "../Chats/Chats.css";
 // import "../Helpers/StoryHelpers/Prompting";
 import {Story} from "../Helpers/Story";
-import { MessagesInfo } from "../interfaces";
+import { DynamicScoresOfInterest, MessagesInfo, Opinions, OthersOpinions, VisibleScores } from "../interfaces";
 import {allIntroMessages} from "../Chats/Chats";
+import { rmSync } from "fs";
 
 // import "../Helpers/StoryHelpers/SampleGeneration";
 
@@ -24,6 +25,9 @@ const Chatbot: React.FC = () => {
 
   //using usefffect for messages so far
   const [messagesSoFar, setMessagesSoFar] = useState<MessagesInfo[]>(allIntroMessages);
+  const [displayableStats, setDisplayableStats] = useState<VisibleScores>(new DynamicScoresOfInterest());
+  const [othersOpinions, setOthersOpinions] = useState<Opinions>(new OthersOpinions());
+  const [luck, setLuck] = useState<number>(10);
   // let messagesSoFar = allIntroMessages;
 
   
@@ -48,9 +52,13 @@ const Chatbot: React.FC = () => {
     // setBotResponse({ ...{purpose:"hold", message:"Consulting the Muse"}, sender: "bot" });
     
     //why is the message not being changed here?
-    myStory.progressStory(msgArray).then((result) => {
+    const thisLuck = Math.ceil(Math.random()*20);
+    setLuck(thisLuck);
+    myStory.progressStory(msgArray, thisLuck).then((result) => {
       console.log("result is ", result);
       console.log("outputTxt", result.outputTxt);
+      setDisplayableStats(result.updatedScores);
+      setOthersOpinions(result.opinionsArray);
       // console.log("messages so far is ", messagesSoFar);
       let res = {
         purpose: "progress story",
@@ -99,43 +107,61 @@ const Chatbot: React.FC = () => {
   const bodyRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="chat-container">
-      <div className="message-container" ref={bodyRef}>
-      {messagesSoFar.map((chat,idx) => (
-        <div key={chat.message +idx}>
-          <div className={`message ${chat.sender}`}>
-            <p>{chat.message}</p>
-          </div>
-          {chat.options ? (
-            <div className="options">
-              <div>
-                <i className="far fa-hand-pointer"></i>
-              </div>
-              {chat.options.map(option => (
-                <p
-                  // onClick={e => props.optionClick(e)}
-                  data-id={option}
-                  key={option + Math.random()}
-                >
-                  {option}
-                </p>
-              ))}
+    <>
+      Score Tracking
+      <div className="meta-info" style={{display:"flex", fontSize:".5em"}}>
+          <div className="displayable-score">food: {displayableStats.food} / 100</div>
+          <div className="displayable-score">shipQuality: {displayableStats.shipQuality} / 100</div>
+          <div className="displayable-score">time: {displayableStats.time}</div>
+          <div className="displayable-score">numCrew: {displayableStats.numCrew}</div>
+          <div className="displayable-score">gold: {displayableStats.gold}</div>
+          <div className="displayable-score">fame: {displayableStats.fame}</div>
+          <div className="displayable-score">luck (last action): {luck}</div>
+      </div>
+      <div className="people-of-interest">
+        people of interest is weird rn
+        {/* People of Interest: {othersOpinions.entities.map((entity, idx) => {
+          return <div>{entity}, {othersOpinions.opinions[idx]}, {othersOpinions.whys[idx]}</div>
+        })} */}
+      </div>
+      <div className="chat-container">
+        <div className="message-container" ref={bodyRef}>
+        {messagesSoFar.map((chat,idx) => (
+          <div key={chat.message +idx}>
+            <div className={`message ${chat.sender}`}>
+              <p>{chat.message}</p>
             </div>
-          ) : null}
-          <div ref={dummyRef} className="dummy-div"></div>
-        </div>
-      ))}
-    </div>
-      <form onSubmit={e => handleSubmit(e)} className="form-container">
-        <input
-          onChange={e => handleInputChange(e)}
-          value={userResponse}
-        ></input>
-        <button>
-          <i className="far fa-paper-plane"></i>
-        </button>
-      </form>
-    </div>
+            {chat.options ? (
+              <div className="options">
+                <div>
+                  <i className="far fa-hand-pointer"></i>
+                </div>
+                {chat.options.map(option => (
+                  <p
+                    // onClick={e => props.optionClick(e)}
+                    data-id={option}
+                    key={option + Math.random()}
+                  >
+                    {option}
+                  </p>
+                ))}
+              </div>
+            ) : null}
+            <div ref={dummyRef} className="dummy-div"></div>
+          </div>
+        ))}
+      </div>
+        <form onSubmit={e => handleSubmit(e)} className="form-container">
+          <input
+            onChange={e => handleInputChange(e)}
+            value={userResponse}
+          ></input>
+          <button>
+            <i className="far fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+    </>
   );
 };
 
