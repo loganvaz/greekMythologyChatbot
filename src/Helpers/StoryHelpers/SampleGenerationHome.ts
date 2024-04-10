@@ -1,9 +1,9 @@
 //this is honestly going to a lot like the Prompting file except I have the output response
 
 import {ScoresOfInterest, MyNode, MessagesInfo, Opinions, NodePart, GptExploringOutput} from "../../interfaces";
-import { generateInput } from "./InputPromptGeneration";
+import { generateHomeInput } from "./InputPromptGeneration";
 
-import scylla from "../../NodeData/charybdis_scylla.json";
+import home from "../../NodeData/home.json";
 
 /* [
     Others Opinions, 
@@ -48,26 +48,27 @@ import scylla from "../../NodeData/charybdis_scylla.json";
 // numCrew:number;
 
 
-export const sampleOutputScyllaLuck15 = (numCrewBefore:number, peopleOfInterest:Opinions):GptExploringOutput => {
+export const sampleOutputHomeLuck12 = (numCrewBefore:number, peopleOfInterest:Opinions):GptExploringOutput => {
     const st = `
     {
-        "thoughts": "Rolled well (and Apollo is helping so we can increase the roll by 2) so can prevent the monster from killing six as normal. However, the ship is going to take damage from both her and the water. Preventing Scylla from taking a crew member hasn't been done before so that deserves some fame. The player is still alive. 5 people die this round as Scylla acts so they lose 5 crew members. They haven't fully escaped yet though they are almost out of Scylla's reach.",
-        "whatHappens": "Suddenly, a terrible six headed monster bursts from the top of the cliff, which you recognize as Scylla. You aim your bow at her and let lose a shot (guided by the favor of Apollo), forcing her to drop one of your men. However, you can do no further harm and as your crew member falls, he hits the ship, breaking it slightly.",
+        "thoughts": "He rolled okay and got the suitors by surprise. Because he caught them by surprise, he should only be able to kill a few of them. However, since Telemachus and 4 crew members joined in they can also kill quite a few people. There are still many suitors left though.",
+        "whatHappens": "You leap out of where you were hidden, catching the suitors by surprise. Two arrows find the front two before they realize what's upon them. Your allies join the fray too, slaying another 2 suitors. The suitors stumble up from the table.",
         "isAlive": true,
-        "crewStrength": -5,
+        "crewStrength": 0,
         "goldGain": 0,
-        "shipQualityChange": -10,
+        "shipQualityChange": 0,
         "timeChange": 0,
-        "famousDeedScore": 1,
+        "famousDeedScore": 0,
         "toldFriendlyPeopleOfDeeds": 0,
-        "additionalDataToPassOn": "The crew just lost several friends to Scylla and so is likely scared for the next few days",
+        "additionalDataToPassOn": "The suitors are surprised but now know they are under atack - they are mostly unarmed though because they were caught feasting.",
         "peopleOfInterest": {
             "entities": ${JSON.stringify(peopleOfInterest.entities)},
             "opinions": ${JSON.stringify(peopleOfInterest.opinions)},
             "whys": ${JSON.stringify(peopleOfInterest.whys)}
         },
         "foodChange": 0,
-        "leftThisPlace": false
+        "wonGame": false,
+        "numSuitorsKilled": 4
     }
 `
     // console.log("json thinking of returning is ", st);
@@ -95,70 +96,70 @@ export const sampleOutputScyllaLuck15 = (numCrewBefore:number, peopleOfInterest:
 //now lets generate an example to put into the prompt
 
 
-scylla.components = scylla.components.map((c:NodePart) => {
+home.components = home.components.map((c:NodePart) => {
     c.status = ["friendly", "hostile", "nuetral"].includes(c.status) ? c.status : "nuetral";
     return c as NodePart;
 });
 
 
 const othersOpinions:Opinions = {
-    entities: ["crew", "Poseidon", "Apollo"],
-    opinions: [10, 0, 3],
-    whys: ["you are generally well liked by the crew", "doesn't have an opinion of you yet", "Apollo is happy you sacrified to him"],
+    entities: ["crew"],
+    opinions: [6, 0, 3],
+    whys: ["you are generally well liked by the crew; they are angered that you didn't tell them about Scylla so they like you less; they are happy you shared gold with them so thye like you more now"],
 };
 
-const numCrew = 16;
+const numCrew = 12;
 const currentScores:ScoresOfInterest = {
     fame:5,
     food:50,
     gold:200,
     shipQuality:45,
-    time:10,
+    time:100,
     numCrew:numCrew
 }
 
 const recentChatHistory:MessagesInfo[] = [
     {
-        message: "You come across a narrow strait with a whirlpool blocking one edge, but high cliffs on the other side. However, squinting you can see the bones of every manner of creature on the side of cliff.",
+        message: home.entranceDescription,
         sender: "bot"
     },
     {
-        message: "I near the cliff because I can't survive the whirlpool",
+        message: "I order my crew to pull up on the other side of the island so we can be undetected.",
         sender:"user"
     },
     {
-        message:"You near the cliff and the crew sighs in relief as you avoid the edge. But you begin to feel something amiss, and you recall an old legend. Whatever lives by the cliff always takes its toll",
+        message:"You successfully avoid detection. What would you like to do next?",
         sender: "bot"
     },
     {
-        message:"I tell my least favorite crew member to stand near the edge and see what happens",
+        message:"I disguise myself and look for Telemachus so I can tell him I've returned",
         sender: "user"
     },
     {
-        message:"He is confused and seeing all the bones around refuses to do so.",
+        message:"You search for a few hours before you find him, keeping your identity hidden from eveyrone else. He doesn't believe you at first but when your childhood caretaker identifies you he believes you. He tells you the suitors here have been trying to marry your wife and disrespecting your house.",
         sender: "bot"
     },
     {
-        message:"I wait til none of the crew is looking then push him over into the whirlpool",
+        message:"I decide we'll ambush them and tell my crew to prepare to attack while they're dining",
         sender: "user"
     },
     {
-        message:"You're very lucky and nobody notices and he drowns immedietly. However, the crew sees him gone after you argue and feel distrustful. You are nearing the cliffs now as you edge away from the whirlpool.",
+        message:"You hide amongst the house while they are feasting successfully. What would you like to do?",
         sender: "bot"
     },
 
     {
-        message: "I get my bow ready to shoot whatever comes near when it attacks",
+        message: "I give the signal to attack then begin firing with my bow.",
         sender:"user"
     }
 ]
 
-const infoToPass = "The ships have been badly damaged by a storm and are prone to breaking. The men are eager to get home and have extra trust in the player after escaping the giants";
-const luck = 15;
-export const sampleInput = generateInput(othersOpinions, currentScores, new MyNode(scylla.entranceDescription, scylla.components, scylla.primarySourceText, scylla.specialInstructions,scylla.citation) , recentChatHistory, infoToPass, luck);
+const infoToPass = "The ships have been badly damaged by a storm and are prone to breaking. The men are eager to get home and have extra trust in the player after escaping the giants; the men are upset about not being told about scylla; the men are happy you shared gold with them; you are told by Aeolus that you must be prepared when you return home; you finally reach home";
+const luck = 12;
+export const sampleInputHome = generateHomeInput(othersOpinions, currentScores, new MyNode(home.entranceDescription, home.components, home.primarySourceText, home.specialInstructions,home.citation) , recentChatHistory, infoToPass, luck, 30);
 // console.log(sampleInput)
 
-export const sampleOutput = sampleOutputScyllaLuck15(numCrew, othersOpinions)
+export const sampleOutputHome = sampleOutputHomeLuck12(numCrew, othersOpinions)
 // console.log(sampleOutput)
 
 

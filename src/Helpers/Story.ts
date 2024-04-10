@@ -19,9 +19,11 @@ import lamus from "../NodeData/lamus.json";
 import lotus from "../NodeData/lotus.json";
 import sirens from "../NodeData/sirens.json";
 import troy from "../NodeData/troy.json";
+import home from "../NodeData/home.json";
 import {MyNode, NodePart, TravelCost, DynamicScoresOfInterest, OthersOpinions, MessagesInfo, VisibleScores, MyNodeInterface} from "../interfaces";
-import {troySacrificePrompt, onIslandExplorePrompt, onIslandFoundPrompt} from "./StoryHelpers/Prompting"
-let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus, sirens];
+import {troySacrificePrompt, onIslandExplorePrompt, onIslandFoundPrompt, onHomeResponse} from "./StoryHelpers/Prompting"
+// let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus, sirens];
+let group = [aeolus, lotus];
 console.log("group is ", group);
 
 
@@ -63,9 +65,9 @@ export class Story {
     nodeIdx:number;
     gptStorage:string;
     atEntrance:boolean;
-    relevantMessagesIdx:number
-    internalFameScore:number
-
+    relevantMessagesIdx:number;
+    internalFameScore:number;
+    numSuitors:number;
     //other things we're tracking
     
 
@@ -84,7 +86,7 @@ export class Story {
         // group.unshift(troy);
         this.nodes = group.map((g) => { return processInputNodeJson(g); });
         this.nodes = shuffle(this.nodes);
-        this.nodes = [processInputNodeJson(troy), ...this.nodes];
+        this.nodes = [processInputNodeJson(troy), ...this.nodes, processInputNodeJson(home)];
         //for now, let's explore sequentially but randomly
         
 
@@ -103,9 +105,6 @@ export class Story {
             }
         });
         
-
-        //TODO - make this terminate at ending node
-        //TODO - make it begin at the starting node
         this.storyProgression.forEach((ll, idx) => {
             this.storyProgression[idx].next = {
                 prob: 1, 
@@ -134,6 +133,8 @@ export class Story {
         //set internal fame to 0
         this.internalFameScore = 0;
 
+        this.numSuitors = 30;
+
         console.log("this.nodes is ", this.nodes);
     }
 
@@ -143,18 +144,17 @@ export class Story {
         console.log("Edge travel is ", this.storyProgression[this.nodeIdx].continuance)
 
         let multiple = 1;
+        if (this.myScores.shipQuality > 50) multiple *= .75;
         if (this.myScores.shipQuality <50) multiple *= 1.25; 
         else if (this.myScores.shipQuality <25) multiple *= 2;
 
+        if (this.myScores.food > 70) multiple *= .75;
         if (this.myScores.food <70) multiple *= 1.25; 
         else if (this.myScores.food <50) multiple *= 2;
         else if (this.myScores.food <50) multiple *= 2.25;
 
         if (this.myScores.time >50) multiple *= 1.25; 
 
-
-        //TODO - edge cost
-    
         this.myScores.changeTime(Math.ceil(multiple*this.storyProgression[this.nodeIdx].continuance.time));
         
         if (this.myScores.changefood(-Math.ceil(multiple*Math.abs(this.storyProgression[this.nodeIdx].continuance.food)))) {
@@ -184,7 +184,13 @@ export class Story {
 
     async progressStory(messagesSoFar: MessagesInfo[], luck:number):Promise<StoryProgression> {
         console.log("scores so far is ", this.myScores);
-
+        if (this.nodeIdx === this.nodes.length) {
+            return {
+                outputTxt: "Congrats you have won the game. Your final score is " + this.myScores.getFinalScore(),
+                updatedScores: this.myScores.getVisibleScores(),
+                opinionsArray: this.othersOpinions
+            }
+        }
         //get info from gpt
         //first are we at troy
         if (this.nodeIdx === 0 && this.atEntrance) {
@@ -209,9 +215,11 @@ export class Story {
             }
         }
         if (this.nodes[this.nodeIdx].entranceDescription.includes("Charybdis")) this.atEntrance = false;
-        else if (this.atEntrance) {
+        else if (this.atEntrance && this.nodeIdx !== this.nodes.length-1) {
             //figure out what to do on the island
-            let gptOutput = await onIslandFoundPrompt(messagesSoFar[messagesSoFar.length-1].message);
+            let gptOutput = "";
+            if (this.nodeIdx < this.nodes.length-1) gptOutput = await onIslandFoundPrompt(messagesSoFar.map(m=>m.message), luck);
+            else gptOutput = "stay";
             console.log("gpt output is ", gptOutput);
             if (gptOutput === "explore") {
                 ; // TODO - should make it so don't have to send two requests
@@ -233,6 +241,21 @@ export class Story {
         }
 
         const relevantMessages = messagesSoFar.slice(this.relevantMessagesIdx);
+
+        //special case of at home 
+        if (this.nodeIdx === this.nodes.length-1) {
+            const gptResponse = await onHomeResponse(this.othersOpinions, this.myScores, this.storyProgression[this.nodeIdx].here, relevantMessages, this.gptStorage, luck, this.numSuitors);
+            if (!gptResponse) {
+                return {
+                    outputTxt: "The Muses are out of services right now. Please state what you tried to do again",
+                    updatedScores: this.myScores.getVisibleScores(),
+                    opinionsArray: this.othersOpinions
+                }
+            }
+            this.numSuitors -= gptResponse.numSuitorsKilled;
+        }
+
+
         const gptResponse = await onIslandExplorePrompt(this.othersOpinions, this.myScores, this.storyProgression[this.nodeIdx].here, relevantMessages, this.gptStorage, luck);
         console.log("gptResponse is ", gptResponse);
         if (!gptResponse) {
@@ -246,7 +269,7 @@ export class Story {
         const {crewStrength, timeChange, toldFriendlyPeopleOfDeeds, additionalDataToPassOn,famousDeedScore, goldGain, isAlive,leftThisPlace, peopleOfInterest,shipQualityChange, whatHappens, foodChange } = gptResponse
 
         this.othersOpinions.updateEntities(peopleOfInterest.opinions, peopleOfInterest.entities , peopleOfInterest.whys);
-        this.gptStorage += additionalDataToPassOn;
+        this.gptStorage += "at time " + this.myScores.time + ", " + additionalDataToPassOn + ";";
         if (!isAlive) {
             return {
                 outputTxt: whatHappens + "You have died. Please start again",

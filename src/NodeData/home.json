@@ -1,0 +1,67 @@
+{
+    "primarySourceText": "This is too long. What I want you to do in the thoughts is summarize what the suitors have been doing at home.",
+    "citation": "none",
+    "specialInstructions": "The suitors think you are daed but are willing to kill you if given the chance. Your wife loves you but believes you dead. Your son also loves you.",
+    "entranceDescription": "A wonderous beauitful island, but most importantly...home",
+    "components": [
+        {
+            "status": "friendly",
+            "fightingStrength": 2,
+            "intelligence": 5,
+            "agression": 1,
+            "explorerDescription": "You enter your house and see your son who is friendly to all and if you can convince him you're his father will fight with you.",
+            "exhibitsXenia": true,
+            "who": "Telemachus",
+            "fightingDetails": "He's a fair fighter. If the main character is a level 10 fighter, he's a level 3. He wants to kill the suitors",
+            "sampleBenefits": {
+                "food": {
+                    "amount": 30,
+                    "how": "You ask him for food as his guest"
+                },
+
+                "shipQuality": {
+                    "amount": 30,
+                    "how": "Your ship can be repaired but you can't sail on."
+                },
+                "fame": {
+                    "amount": 0,
+                    "how": "Unknown how gain fame this way"
+                },
+                "gold": {
+                    "amount": 0,
+                    "how": "He will give you gives but they're all your own so you gain no gold."
+                }
+                
+            }
+        },
+        {
+            "status": "hostile",
+            "fightingStrength": 3,
+            "intelligence": 2,
+            "agression": 2,
+            "explorerDescription": "You enter your house and see the suitors who are hostile to you and will fight you.",
+            "exhibitsXenia": false,
+            "who": "The suitors",
+            "fightingDetails": "They can't fight well, but there's a lot of them.",
+            "sampleBenefits": {
+                "food": {
+                    "amount": 2,
+                    "how": "They make you beg for food then humiliate you"
+                },
+                "fame": {
+                    "amount": 3,
+                    "how": "You gain fame by taking back your home"
+                },
+                "gold": {
+                    "amount": 0,
+                    "how": "They are not generous and will give you no gifts"
+                },
+                "shipQuality": {
+                    "amount": 0,
+                    "how": "Won't give you a ship."
+                }
+            }
+
+        }
+    ]
+}

@@ -118,12 +118,12 @@ const Chatbot: React.FC = () => {
           <div className="displayable-score">fame: {displayableStats.fame}</div>
           <div className="displayable-score">luck (last action): {luck}</div>
       </div>
-      <div className="people-of-interest">
+      {/* <div className="people-of-interest">
         people of interest is weird rn
-        {/* People of Interest: {othersOpinions.entities.map((entity, idx) => {
+        People of Interest: {othersOpinions.entities.map((entity, idx) => {
           return <div>{entity}, {othersOpinions.opinions[idx]}, {othersOpinions.whys[idx]}</div>
-        })} */}
-      </div>
+        })}
+      </div> */}
       <div className="chat-container">
         <div className="message-container" ref={bodyRef}>
         {messagesSoFar.map((chat,idx) => (

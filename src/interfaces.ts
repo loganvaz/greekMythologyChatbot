@@ -166,6 +166,10 @@ export class DynamicScoresOfInterest implements ScoresOfInterest{
             fame:this.fame
         }
     }
+
+    getFinalScore() {
+        return this.food/100 + this.gold/50 + this.fame + this.numCrew/5 + this.shipQuality/100 - this.time/32;
+    }
 }
 
 export interface NodePart {
@@ -246,5 +250,27 @@ export interface GptExploringOutput {
     toldFriendlyPeopleOfDeeds:number,
     additionalDataToPassOn:string,
     peopleOfInterest:Opinions,
-    leftThisPlace:boolean
+    leftThisPlace?:boolean
 }
+
+export interface GptHomeOutput extends GptExploringOutput {
+    wonGame:boolean,
+    numSuitorsKilled:number
+}
+
+// export interface GptHomeOutput {
+//     thoughts:string
+//     whatHappens:string,
+//     isAlive:boolean,
+//     crewStrength:number,
+//     goldGain:number,
+//     shipQualityChange:number,
+//     timeChange:number,
+//     foodChange:number,
+//     famousDeedScore:number,
+//     toldFriendlyPeopleOfDeeds:number,
+//     additionalDataToPassOn:string,
+//     peopleOfInterest:Opinions,
+//     wonGame:boolean,
+//     numSuitorsKilled:number
+// }
