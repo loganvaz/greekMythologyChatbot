@@ -156,7 +156,7 @@ Use luck to determine how successful an action is. Treat it like a DnD d20 roll.
 Any changes in food, ship quality, gold, fame, etc. should be explicitly stated (why it happened). Fame should only be given out once. Defeating a monster should increase fame as should meetin a god. Food represents the food on the ship.
 Generally, ship repairs should cost 10 gold and take 2 days for a ship repair of 1. If you have help, this increases the amount of ship repair and decreases the time. If they say we reapir the ship, assume they spend a week doing it. They can also forage for food and stuff during this time.
 
-    Remeber, the player's goal is to kill all the suitors. This must be done. 
+    Remeber, the player's goal is to kill all the suitors. This must be done. The suitors are not good fighters. Consider the number of people in the players crew.
 Yor task is to return the following:
     {
         

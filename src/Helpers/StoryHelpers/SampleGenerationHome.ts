@@ -51,7 +51,7 @@ import home from "../../NodeData/home.json";
 export const sampleOutputHomeLuck12 = (numCrewBefore:number, peopleOfInterest:Opinions):GptExploringOutput => {
     const st = `
     {
-        "thoughts": "He rolled okay and got the suitors by surprise. Because he caught them by surprise, he should only be able to kill a few of them. However, since Telemachus and 4 crew members joined in they can also kill quite a few people. There are still many suitors left though.",
+        "thoughts": "He rolled okay and got the suitors by surprise. Because he caught them by surprise, he should only be able to kill a few of them. However, since Telemachus and 4 crew members joined in they can also kill quite a few people. There are still many suitors left though. There are 14 of you and only 30 suitors and your crew is much better at fighting so you should prevail easily even without the element of surprise.",
         "whatHappens": "You leap out of where you were hidden, catching the suitors by surprise. Two arrows find the front two before they realize what's upon them. Your allies join the fray too, slaying another 2 suitors. The suitors stumble up from the table.",
         "isAlive": true,
         "crewStrength": 0,

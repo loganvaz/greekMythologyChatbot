@@ -21,7 +21,7 @@ import sirens from "../NodeData/sirens.json";
 import troy from "../NodeData/troy.json";
 import home from "../NodeData/home.json";
 import {MyNode, NodePart, TravelCost, DynamicScoresOfInterest, OthersOpinions, MessagesInfo, VisibleScores, MyNodeInterface} from "../interfaces";
-import {troySacrificePrompt, onIslandExplorePrompt, onIslandFoundPrompt, onHomeResponse} from "./StoryHelpers/Prompting"
+import {troySacrificePrompt, onIslandExplorePrompt, onIslandFoundPrompt, onHomeResponse} from "./StoryHelpers/Prompting";
 // let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus, sirens];
 let group = [aeolus, lotus];
 console.log("group is ", group);
@@ -68,6 +68,7 @@ export class Story {
     relevantMessagesIdx:number;
     internalFameScore:number;
     numSuitors:number;
+    wonGame:boolean
     //other things we're tracking
     
 
@@ -135,6 +136,8 @@ export class Story {
 
         this.numSuitors = 30;
 
+        this.wonGame = false;
+
         console.log("this.nodes is ", this.nodes);
     }
 
@@ -184,7 +187,7 @@ export class Story {
 
     async progressStory(messagesSoFar: MessagesInfo[], luck:number):Promise<StoryProgression> {
         console.log("scores so far is ", this.myScores);
-        if (this.nodeIdx === this.nodes.length) {
+        if (this.nodeIdx === this.nodes.length || this.wonGame) {
             return {
                 outputTxt: "Congrats you have won the game. Your final score is " + this.myScores.getFinalScore(),
                 updatedScores: this.myScores.getVisibleScores(),
@@ -253,6 +256,9 @@ export class Story {
                 }
             }
             this.numSuitors -= gptResponse.numSuitorsKilled;
+            if (this.numSuitors <= 0 || gptResponse.wonGame) {
+                this.wonGame = true;
+            }
         }
 
 

@@ -120,7 +120,7 @@ export class DynamicScoresOfInterest implements ScoresOfInterest{
     numCrew:number;
 
     constructor() {
-        this.fame = 0; this.food = 100; this.gold = 100; this.shipQuality = 100; this.time = 0; this.numCrew = 20;
+        this.fame = 0; this.food = 100; this.gold = 100; this.shipQuality = 100; this.time = 0; this.numCrew = 50;
     }
 
     changefood(amountChange:number):boolean {
