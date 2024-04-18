@@ -98,9 +98,11 @@ export interface VisibleScores {
     shipQuality:number;
     time:number;
     numCrew:number;
+    gold:number;
+    fame:number;
 }
 
-export interface ScoresOfInterest {
+export interface ScoresOfInterest extends VisibleScores {
     fame:number;
     food:number;
     gold:number;
@@ -118,12 +120,11 @@ export class DynamicScoresOfInterest implements ScoresOfInterest{
     numCrew:number;
 
     constructor() {
-        this.fame = 0; this.food = 100; this.gold = 100; this.shipQuality = 100; this.time = 0; this.numCrew = 20;
+        this.fame = 0; this.food = 100; this.gold = 100; this.shipQuality = 100; this.time = 0; this.numCrew = 50;
     }
 
-    //each of these change functions will change and return if something goes wrong
     changefood(amountChange:number):boolean {
-        this.food -= amountChange;
+        this.food += amountChange;
         if (this.food <0) return true;
         return false;
     }
@@ -160,8 +161,14 @@ export class DynamicScoresOfInterest implements ScoresOfInterest{
             food: this.food,
             shipQuality: this.shipQuality,
             time: this.time,
-            numCrew: this.numCrew
+            numCrew: this.numCrew,
+            gold:this.gold,
+            fame:this.fame
         }
+    }
+
+    getFinalScore() {
+        return this.food/100 + this.gold/50 + this.fame + this.numCrew/5 + this.shipQuality/100 - this.time/32;
     }
 }
 
@@ -236,11 +243,34 @@ export interface GptExploringOutput {
     isAlive:boolean,
     crewStrength:number,
     goldGain:number,
-    shipQuality:number,
+    shipQualityChange:number,
     timeChange:number,
+    foodChange:number,
     famousDeedScore:number,
     toldFriendlyPeopleOfDeeds:number,
     additionalDataToPassOn:string,
     peopleOfInterest:Opinions,
-    leftThisPlace:boolean
+    leftThisPlace?:boolean
 }
+
+export interface GptHomeOutput extends GptExploringOutput {
+    wonGame:boolean,
+    numSuitorsKilled:number
+}
+
+// export interface GptHomeOutput {
+//     thoughts:string
+//     whatHappens:string,
+//     isAlive:boolean,
+//     crewStrength:number,
+//     goldGain:number,
+//     shipQualityChange:number,
+//     timeChange:number,
+//     foodChange:number,
+//     famousDeedScore:number,
+//     toldFriendlyPeopleOfDeeds:number,
+//     additionalDataToPassOn:string,
+//     peopleOfInterest:Opinions,
+//     wonGame:boolean,
+//     numSuitorsKilled:number
+// }

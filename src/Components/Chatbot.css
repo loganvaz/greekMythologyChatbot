@@ -35,3 +35,14 @@
   opacity: 0.8;
   cursor: pointer;
 }/*# sourceMappingURL=Chatbot.css.map */
+
+
+
+.displayable-score {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5em;
+  border-radius: 10px;
+  /* margin: 0.5em 0; */
+  margin-right:2em;
+}
