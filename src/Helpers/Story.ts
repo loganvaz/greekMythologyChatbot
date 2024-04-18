@@ -1,17 +1,3 @@
-//define our class that determines story interaction
-
-
-// class Story {
-
-//     constructor() {
-//         //first, we need to load in the relevant nodes
-//     }   
-
-
-// }
-
-// export default Story;
-import { updateInterfaceDeclaration } from "typescript";
 import aeolus from "../NodeData/aeolus.json";
 import charydbis_scyllab from "../NodeData/charybdis_scylla.json";
 import hydra from "../NodeData/hydra.json";
@@ -22,8 +8,8 @@ import troy from "../NodeData/troy.json";
 import home from "../NodeData/home.json";
 import {MyNode, NodePart, TravelCost, DynamicScoresOfInterest, OthersOpinions, MessagesInfo, VisibleScores, MyNodeInterface} from "../interfaces";
 import {troySacrificePrompt, onIslandExplorePrompt, onIslandFoundPrompt, onHomeResponse} from "./StoryHelpers/Prompting";
-// let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus, sirens];
-let group = [aeolus, lotus];
+let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus, sirens];
+// let group = [aeolus, lotus];
 console.log("group is ", group);
 
 
@@ -146,17 +132,20 @@ export class Story {
         console.log("my scores is ", this.myScores);
         console.log("Edge travel is ", this.storyProgression[this.nodeIdx].continuance)
 
+        //edge cost increases worse you are
         let multiple = 1;
-        if (this.myScores.shipQuality > 50) multiple *= .75;
+        if (this.myScores.shipQuality > 50) multiple *= .7;
         if (this.myScores.shipQuality <50) multiple *= 1.25; 
         else if (this.myScores.shipQuality <25) multiple *= 2;
 
-        if (this.myScores.food > 70) multiple *= .75;
-        if (this.myScores.food <70) multiple *= 1.25; 
+        if (this.myScores.food > 70) multiple *= .7;
+        if (this.myScores.food >= 60) multiple *= .75;
+        if (this.myScores.food <60) multiple *= 1.25; 
         else if (this.myScores.food <50) multiple *= 2;
-        else if (this.myScores.food <50) multiple *= 2.25;
+        else if (this.myScores.food <10) multiple *= 2.25;
 
         if (this.myScores.time >50) multiple *= 1.25; 
+        else if (this.myScores.time < 10) multiple *= .8;
 
         this.myScores.changeTime(Math.ceil(multiple*this.storyProgression[this.nodeIdx].continuance.time));
         
@@ -167,7 +156,8 @@ export class Story {
                 opinionsArray: this.othersOpinions
             }
         
-        };
+        }
+
         if (this.myScores.changeShipQuality(-Math.ceil(multiple*Math.abs(this.storyProgression[this.nodeIdx].continuance.shipQuality)))) {
             return {
                 outputTxt: "Your ship has sunk. Please start again",
@@ -176,6 +166,8 @@ export class Story {
             }
         
         };
+
+        //mark messages thru here bc after this is only what pass to gpt
         this.relevantMessagesIdx = messagesSoFar.length-1;
         this.nodeIdx += 1;
         return {
@@ -186,7 +178,8 @@ export class Story {
     }
 
     async progressStory(messagesSoFar: MessagesInfo[], luck:number):Promise<StoryProgression> {
-        console.log("scores so far is ", this.myScores);
+
+        //if end condition explicitly triggered, return that 
         if (this.nodeIdx === this.nodes.length || this.wonGame) {
             return {
                 outputTxt: "Congrats you have won the game. Your final score is " + this.myScores.getFinalScore(),
@@ -194,7 +187,6 @@ export class Story {
                 opinionsArray: this.othersOpinions
             }
         }
-        //get info from gpt
         //first are we at troy
         if (this.nodeIdx === 0 && this.atEntrance) {
             console.log("Troy consideration");
@@ -217,6 +209,8 @@ export class Story {
                 opinionsArray: this.othersOpinions
             }
         }
+
+        //some nodes you can't avoid the entrance
         if (this.nodes[this.nodeIdx].entranceDescription.includes("Charybdis")) this.atEntrance = false;
         else if (this.atEntrance && this.nodeIdx !== this.nodes.length-1) {
             //figure out what to do on the island
@@ -237,12 +231,11 @@ export class Story {
                 }
             }
             else { //its travel
-
                 return this.edgeTravel(messagesSoFar);
-            
             }
         }
 
+        //get relevant messages
         const relevantMessages = messagesSoFar.slice(this.relevantMessagesIdx);
 
         //special case of at home 
@@ -261,7 +254,7 @@ export class Story {
             }
         }
 
-
+        //get island explore prompt
         const gptResponse = await onIslandExplorePrompt(this.othersOpinions, this.myScores, this.storyProgression[this.nodeIdx].here, relevantMessages, this.gptStorage, luck);
         console.log("gptResponse is ", gptResponse);
         if (!gptResponse) {
@@ -272,6 +265,8 @@ export class Story {
             
             }
         }
+
+        //extract what we want to modify from the gpt response
         const {crewStrength, timeChange, toldFriendlyPeopleOfDeeds, additionalDataToPassOn,famousDeedScore, goldGain, isAlive,leftThisPlace, peopleOfInterest,shipQualityChange, whatHappens, foodChange } = gptResponse
 
         this.othersOpinions.updateEntities(peopleOfInterest.opinions, peopleOfInterest.entities , peopleOfInterest.whys);
@@ -284,8 +279,6 @@ export class Story {
             }
         }
 
-        
-
         //update what you did here
         this.myScores.changeTime(timeChange);
         const amountTold = toldFriendlyPeopleOfDeeds;
@@ -293,9 +286,7 @@ export class Story {
         this.myScores.changeFame(famousDeedScore);
         this.myScores.changeGold(goldGain);
 
-
-
-
+        //update scores where you could die
         if (this.myScores.changefood(foodChange)) {
             return {
                 outputTxt: whatHappens + "You have run out of food and have died. Please start again",
@@ -324,38 +315,12 @@ export class Story {
             this.atEntrance = true;
             return this.edgeTravel(messagesSoFar);
         }
+
         this.atEntrance = false;
         return {
             outputTxt: whatHappens,
             updatedScores: this.myScores.getVisibleScores(),
             opinionsArray: this.othersOpinions
         }
-
-        //figure out if we died and update scores
-
-        //return the next story progression
     }
-
-    /*
-        user prompt:
-            onStay => increase time by 1, decrease food
-            onContinue => back to travel
-            onExplore => prompt GPT
-
-        onTravel => 
-            bad weather probability (model 1 for each amount of time)
-            on bad weather, determine how much worse everything gets. Ask GPT if anyone interferes to help/hurt after coming up with initial numbers.
-                shipQuality, time, food, number of crew, etc. can all change
-            bring to new destination
-        
-        onExplore => GPT decides what to do next
-    */
-
-
-
 }
-export {}
-/*
-Mapper of states you can end up in w/ some kind of transition probabilities (randomly generate map or something)
-
-*/
