@@ -8,8 +8,8 @@ import troy from "../NodeData/troy.json";
 import home from "../NodeData/home.json";
 import {MyNode, NodePart, TravelCost, DynamicScoresOfInterest, OthersOpinions, MessagesInfo, VisibleScores, MyNodeInterface, GptExploringOutput} from "../interfaces";
 import {troySacrificePrompt, onIslandExplorePrompt, onIslandFoundPrompt, onHomeResponse} from "./StoryHelpers/Prompting";
-// let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus, sirens];
-let group = [aeolus, lotus];
+let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus, sirens];
+// let group = [aeolus, lotus];
 console.log("group is ", group);
 
 
@@ -78,7 +78,6 @@ export class Story {
         
 
         //construct our dummy linked list
-        //TODO - these need to interact
         this.storyProgression = this.nodes.map((n, idx) =>  {
             const foodCost = (1+Math.random())*10;
             const shipCost = Math.random() < .5 ? (1+Math.random()) * 2 : 10*Math.random() + Math.random() * 20
@@ -252,6 +251,7 @@ export class Story {
                 }
             }
             this.numSuitors -= expandedGptResponse.numSuitorsKilled;
+            console.log("num suitors is ", this.numSuitors);
             if (this.numSuitors <= 0 || expandedGptResponse.wonGame) {
                 this.wonGame = true;
             }
