@@ -151,7 +151,7 @@ export class DynamicScoresOfInterest implements ScoresOfInterest{
     }
 
     changeNumCrew(amountChange:number) {
-        this.numCrew += amountChange;
+        this.numCrew = amountChange;
         if (this.numCrew <0) return true;
         return false;
     }
