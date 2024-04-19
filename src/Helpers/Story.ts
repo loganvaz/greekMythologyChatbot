@@ -6,10 +6,10 @@ import lotus from "../NodeData/lotus.json";
 import sirens from "../NodeData/sirens.json";
 import troy from "../NodeData/troy.json";
 import home from "../NodeData/home.json";
-import {MyNode, NodePart, TravelCost, DynamicScoresOfInterest, OthersOpinions, MessagesInfo, VisibleScores, MyNodeInterface} from "../interfaces";
+import {MyNode, NodePart, TravelCost, DynamicScoresOfInterest, OthersOpinions, MessagesInfo, VisibleScores, MyNodeInterface, GptExploringOutput} from "../interfaces";
 import {troySacrificePrompt, onIslandExplorePrompt, onIslandFoundPrompt, onHomeResponse} from "./StoryHelpers/Prompting";
-let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus, sirens];
-// let group = [aeolus, lotus];
+// let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus, sirens];
+let group = [aeolus, lotus];
 console.log("group is ", group);
 
 
@@ -238,33 +238,41 @@ export class Story {
         //get relevant messages
         const relevantMessages = messagesSoFar.slice(this.relevantMessagesIdx);
 
+        let gptResponse:null|GptExploringOutput = null;
+
         //special case of at home 
         if (this.nodeIdx === this.nodes.length-1) {
-            const gptResponse = await onHomeResponse(this.othersOpinions, this.myScores, this.storyProgression[this.nodeIdx].here, relevantMessages, this.gptStorage, luck, this.numSuitors);
-            if (!gptResponse) {
+            const expandedGptResponse = await onHomeResponse(this.othersOpinions, this.myScores, this.storyProgression[this.nodeIdx].here, relevantMessages, this.gptStorage, luck, this.numSuitors);
+            console.log("home response is ", expandedGptResponse);
+            if (!expandedGptResponse) {
                 return {
                     outputTxt: "The Muses are out of services right now. Please state what you tried to do again",
                     updatedScores: this.myScores.getVisibleScores(),
                     opinionsArray: this.othersOpinions
                 }
             }
-            this.numSuitors -= gptResponse.numSuitorsKilled;
-            if (this.numSuitors <= 0 || gptResponse.wonGame) {
+            this.numSuitors -= expandedGptResponse.numSuitorsKilled;
+            if (this.numSuitors <= 0 || expandedGptResponse.wonGame) {
                 this.wonGame = true;
+            }
+            gptResponse = expandedGptResponse;
+        }
+        else {
+            //get island explore prompt
+            console.log("hitting onIslandExplorePrompt");
+            gptResponse = await onIslandExplorePrompt(this.othersOpinions, this.myScores, this.storyProgression[this.nodeIdx].here, relevantMessages, this.gptStorage, luck);
+            console.log("[onIslandExplorePrompt] gptResponse is ", gptResponse);
+            if (!gptResponse) {
+                return {
+                    outputTxt: "The Muses are out of services right now. Please state what you tried to do again",
+                    updatedScores: this.myScores.getVisibleScores(),
+                    opinionsArray: this.othersOpinions
+                
+                }
             }
         }
 
-        //get island explore prompt
-        const gptResponse = await onIslandExplorePrompt(this.othersOpinions, this.myScores, this.storyProgression[this.nodeIdx].here, relevantMessages, this.gptStorage, luck);
-        console.log("gptResponse is ", gptResponse);
-        if (!gptResponse) {
-            return {
-                outputTxt: "The Muses are out of services right now. Please state what you tried to do again",
-                updatedScores: this.myScores.getVisibleScores(),
-                opinionsArray: this.othersOpinions
-            
-            }
-        }
+        
 
         //extract what we want to modify from the gpt response
         const {crewStrength, timeChange, toldFriendlyPeopleOfDeeds, additionalDataToPassOn,famousDeedScore, goldGain, isAlive,leftThisPlace, peopleOfInterest,shipQualityChange, whatHappens, foodChange } = gptResponse

@@ -142,7 +142,7 @@ export const onIslandFoundPrompt = async (inputs:string[], luck:number):Promise<
 
     const response = await hitGpt(data);
     if (response === 0) return "unknown";
-    const retrieved = await response.json();
+    const retrieved = (await response.json());
     console.log("onIslandFoundPrompt retrieved is ", retrieved);
     const toRet = retrieved["output"];
     if (toRet === "unknown" || !toRet) return "unknown";
@@ -195,7 +195,7 @@ export const onIslandExplorePrompt = async (othersOpinions:Opinions, currentScor
     if (response === 0 || response.status !== 200) {
         return null;
     } 
-    const json = await response.json()
+    const json = (await response.json())["output"]
     console.log("onisland explore json is",json );
     return json as GptExploringOutput;
     // const thisInput = generateInput(othersOpinions, currentScores, node, recentChatHistory, infoToPass, luck);
@@ -291,7 +291,7 @@ export const onHomeResponse = async(othersOpinions:Opinions, currentScores: Scor
         console.log("onHomeResponse is ", response);
         return null;
     }
-    const d = (await response.json()) as GptHomeOutput;
+    const d = (await response.json())["output"] as GptHomeOutput;
     return d;
     // const thisInput = generateHomeInput(othersOpinions, currentScores, node, recentChatHistory, infoToPass, luck, numSuitors);
 
