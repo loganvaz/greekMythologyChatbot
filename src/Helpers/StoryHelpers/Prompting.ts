@@ -77,63 +77,141 @@ const basePromptExploring = `You are esentially the dungeon master for this play
         Remeber, your entire response should be a json string that can be parsed with JSON.parse in js. Make sure you return a dictionary like above that is json parseable. Remember, you will receive a message responding to input, that is the ONLY one that should affect any changes. Any gold found earlier in the messages, crew that died, etc. should only be considered if its a consequence of the message responding to user input.`
 
 
-export const troySacrificePrompt = async (userInput:string):Promise<number> => {
-    const basePrompt = "Your goal is to determine if the user is sacrificing to the gods and if so how much. If they specify an amount, return that amount. If they say a lot, that means 50, a medium amount means 20; if they specify return that. Return only the numeber and nothing else. If they just typed a number return what they typed: Example: Input: I sacrifice a lot to the gods before returning from Troy. Output: 50";
-    const completion = await openai.chat.completions.create({
-        model:model_version,
-        messages: [{role:"system", content:basePrompt}, {role:"user", content:userInput}]
-    });
-
-    const txt = completion.choices[0].message.content;
-    if (!txt) return 0;
-    try {
-        return parseInt(txt);
-    }
-    catch (err) {
-        console.log("Error is ", err);
+async function hitGpt(data:any):Promise<Response | 0> {
+    if (!process.env.REACT_APP_PROMPTING_URL) {
+        console.log("env is ", process.env);
+        console.log("no prompting url found");
         return 0;
     }
+    const response = await fetch(process.env.REACT_APP_PROMPTING_URL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Access-Control-Allow-Origin':'*',
+            'Content-Type': 'application/json'
+        }
+    });
+    return response;
+}
+
+export const troySacrificePrompt = async (userInput:string):Promise<number> => {
+    // strict(process.env.PROMPTING_URL);
+    
+    const data = {
+        type: "troySacrificePrompt",
+        messagesSoFar: [
+            {
+                sender: "user",
+                message: userInput
+            }
+        ],
+        luck:-1
+    }
+    const response = await hitGpt(data);
+    if (response === 0) return 0;
+    
+    const retrieved = await response.json();
+    console.log(retrieved, ("retrieved"));
+    return parseInt(retrieved["output"]);
+    // const basePrompt = "Your goal is to determine if the user is sacrificing to the gods and if so how much. If they specify an amount, return that amount. If they say a lot, that means 50, a medium amount means 20; if they specify return that. Return only the numeber and nothing else. If they just typed a number return what they typed: Example: Input: I sacrifice a lot to the gods before returning from Troy. Output: 50";
+    // const completion = await openai.chat.completions.create({
+    //     model:model_version,
+    //     messages: [{role:"system", content:basePrompt}, {role:"user", content:userInput}]
+    // });
+
+    // const txt = completion.choices[0].message.content;
+    // if (!txt) return 0;
+    // try {
+    //     return parseInt(txt);
+    // }
+    // catch (err) {
+    //     console.log("Error is ", err);
+    //     return 0;
+    // }
 
 }
 
 //import examples and add them 
 export const onIslandFoundPrompt = async (inputs:string[], luck:number):Promise<string> => {
-    console.log("in island found prompt");
-    const basePrompt = "You are a simple parser. The person has three options - 1) stay where they are [stay], 2) explore the island [explore], 3) continue traveling [travel]. Your job is to tell me which one they choose. Say only explore, travel, stay, or can't tell [unknown]. You must return either unknown, stay, explore, or travel. If they sail away from teh isalnd, they are leaving [travel]. Mentions of foraging/anything wiht interactiona are explore, anythign sailing away from the island is travel. If the encounter is water based (sirens, Scylla) they cannot travel until they have passed the initial challenge."
-    const prevMessageList:string[] = inputs.filter((v, idx) => idx !== inputs.length-1);
-    console.log("got input list");
-    const prevMessages:string = "prev messages:" +  (prevMessageList.length ? prevMessageList.join("\n") : "none");
-    console.log("prev messages is ", prevMessages);
-    const thisMessage = "current mesage: " + inputs[inputs.length-1] + " with a luck of " + luck;
-    const completion = await openai.chat.completions.create({
-        model:model_version,
-        messages: [{role:"system", content:basePrompt}, {role:"user", content:prevMessages + thisMessage}]
-    });
-    const txt = completion.choices[0].message.content;
-    console.log("island found return");
-    if (!txt) return "unknown";
-    // if (txt.includes("stay")) return "stay";
-    if (txt.includes("explore")) return "explore";
-    if (txt.includes("travel")) return "travel";
+
+    const data = {
+        type: "onIslandFoundPrompt",
+        luck: luck,
+        messagesSoFar: inputs
+    }
+
+    const response = await hitGpt(data);
+    if (response === 0) return "unknown";
+    const retrieved = await response.json();
+    console.log("onIslandFoundPrompt retrieved is ", retrieved);
+    const toRet = retrieved["output"];
+    if (toRet === "unknown" || !toRet) return "unknown";
+    // if (toRet.includes("stay")) return "stay";
+    if (toRet.includes("travel")) return "travel";
     return "explore";
+    // console.log("in island found prompt");
+    // const basePrompt = "You are a simple parser. The person has three options - 1) stay where they are [stay], 2) explore the island [explore], 3) continue traveling [travel]. Your job is to tell me which one they choose. Say only explore, travel, stay, or can't tell [unknown]. You must return either unknown, stay, explore, or travel. If they sail away from teh isalnd, they are leaving [travel]. Mentions of foraging/anything wiht interactiona are explore, anythign sailing away from the island is travel. If the encounter is water based (sirens, Scylla) they cannot travel until they have passed the initial challenge."
+    // const prevMessageList:string[] = inputs.filter((v, idx) => idx !== inputs.length-1);
+    // console.log("got input list");
+    // const prevMessages:string = "prev messages:" +  (prevMessageList.length ? prevMessageList.join("\n") : "none");
+    // console.log("prev messages is ", prevMessages);
+    // const thisMessage = "current mesage: " + inputs[inputs.length-1] + " with a luck of " + luck;
+    // const completion = await openai.chat.completions.create({
+    //     model:model_version,
+    //     messages: [{role:"system", content:basePrompt}, {role:"user", content:prevMessages + thisMessage}]
+    // });
+    // const txt = completion.choices[0].message.content;
+    // console.log("island found return");
+    // if (!txt) return "unknown";
+    // // if (txt.includes("stay")) return "stay";
+    // if (txt.includes("explore")) return "explore";
+    // if (txt.includes("travel")) return "travel";
+    // return "explore";
 }
 
 
 export const onIslandExplorePrompt = async (othersOpinions:Opinions, currentScores: ScoresOfInterest, node:MyNode, recentChatHistory:MessagesInfo[], infoToPass:string, luck:number):Promise<GptExploringOutput|null> => {
-    const thisInput = generateInput(othersOpinions, currentScores, node, recentChatHistory, infoToPass, luck);
-    //send prompt to gpt using baseprompt as sys prompt and this input as my prompt
-    const completion = await openai.chat.completions.create({
-        model:model_version,
-        messages: [{role:"system", content:basePromptExploring}, {role:"user", content:thisInput}]
-    });
 
-    if (completion.choices[0].message.content) {
-        console.log("msg content is ", completion.choices[0].message.content);
-        return JSON.parse(completion.choices[0].message.content) as GptExploringOutput;
+    const data = {
+        type: "onIslandExplorePrompt",
+        luck: luck,
+        messagesSoFar: recentChatHistory,
+        othersOpinions: othersOpinions,
+        currentScores: currentScores,
+        node: {
+            entranceDescription:node.entranceDescription,
+            components: node.components,
+            primarySourceText: node.primarySourceText,
+            specialInstructions:node.specialInstructions,
+            citation: node.citation
+        },
+        infoToPass: infoToPass
     }
-    else {
+        
+    
+
+    const response = await hitGpt(data);
+    console.log("[onIslandExplore] response is", response);
+    if (response === 0 || response.status !== 200) {
         return null;
-    }
+    } 
+    const json = await response.json()
+    console.log("onisland explore json is",json );
+    return json as GptExploringOutput;
+    // const thisInput = generateInput(othersOpinions, currentScores, node, recentChatHistory, infoToPass, luck);
+    // //send prompt to gpt using baseprompt as sys prompt and this input as my prompt
+    // const completion = await openai.chat.completions.create({
+    //     model:model_version,
+    //     messages: [{role:"system", content:basePromptExploring}, {role:"user", content:thisInput}]
+    // });
+
+    // if (completion.choices[0].message.content) {
+    //     console.log("msg content is ", completion.choices[0].message.content);
+    //     return JSON.parse(completion.choices[0].message.content) as GptExploringOutput;
+    // }
+    // else {
+    //     return null;
+    // }
     
 }
 
@@ -190,18 +268,43 @@ Yor task is to return the following:
 Remeber, your entire response should be a json string that can be parsed with JSON.parse in js. Make sure you return a dictionary like above that is json parseable. Remember, you will receive a message responding to input, that is the ONLY one that should affect any changes. Any gold found earlier in the messages, crew that died, etc. should only be considered if its a consequence of the message responding to user input.`
 
 export const onHomeResponse = async(othersOpinions:Opinions, currentScores: ScoresOfInterest, node:MyNode, recentChatHistory:MessagesInfo[], infoToPass:string, luck:number, numSuitors:number):Promise<GptHomeOutput|null> => {
-    const thisInput = generateHomeInput(othersOpinions, currentScores, node, recentChatHistory, infoToPass, luck, numSuitors);
 
-    const completion = await openai.chat.completions.create({
-        model:model_version,
-        messages: [{role:"system", content:basePromptHome}, {role:"user", content:thisInput}]
-    });
-
-    if (completion.choices[0].message.content) {
-        console.log("msg content is ", completion.choices[0].message.content);
-        return JSON.parse(completion.choices[0].message.content) as GptHomeOutput;
+    const data = {
+        type: "onIslandExplorePrompt",
+        luck: luck,
+        messagesSoFar: recentChatHistory,
+        othersOpinions: othersOpinions,
+        currentScores: currentScores,
+        node: {
+            entranceDescription:node.entranceDescription,
+            components: node.components,
+            primarySourceText: node.primarySourceText,
+            specialInstructions:node.specialInstructions,
+            citation: node.citation
+        },
+        infoToPass: infoToPass,
+        numSuitors: numSuitors
     }
-    else {
+
+    const response = await hitGpt(data);
+    if (response === 0 || response.status !== 200) {
+        console.log("onHomeResponse is ", response);
         return null;
     }
+    const d = (await response.json()) as GptHomeOutput;
+    return d;
+    // const thisInput = generateHomeInput(othersOpinions, currentScores, node, recentChatHistory, infoToPass, luck, numSuitors);
+
+    // const completion = await openai.chat.completions.create({
+    //     model:model_version,
+    //     messages: [{role:"system", content:basePromptHome}, {role:"user", content:thisInput}]
+    // });
+
+    // if (completion.choices[0].message.content) {
+    //     console.log("msg content is ", completion.choices[0].message.content);
+    //     return JSON.parse(completion.choices[0].message.content) as GptHomeOutput;
+    // }
+    // else {
+    //     return null;
+    // }
 }
