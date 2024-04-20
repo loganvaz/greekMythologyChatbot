@@ -250,7 +250,7 @@ export class Story {
                     opinionsArray: this.othersOpinions
                 }
             }
-            this.numSuitors -= expandedGptResponse.numSuitorsKilled;
+            this.numSuitors = expandedGptResponse.numSuitorsLeft;
             console.log("num suitors is ", this.numSuitors);
             if (this.numSuitors <= 0 || expandedGptResponse.wonGame) {
                 this.wonGame = true;

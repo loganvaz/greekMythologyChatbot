@@ -255,7 +255,7 @@ export interface GptExploringOutput {
 
 export interface GptHomeOutput extends GptExploringOutput {
     wonGame:boolean,
-    numSuitorsKilled:number
+    numSuitorsLeft:number
 }
 
 // export interface GptHomeOutput {
