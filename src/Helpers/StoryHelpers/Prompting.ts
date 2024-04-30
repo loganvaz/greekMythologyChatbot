@@ -20,7 +20,7 @@ async function hitGpt(data:any):Promise<Response | 0> {
 
 export const troySacrificePrompt = async (userInput:string):Promise<number> => {
     // strict(process.env.PROMPTING_URL);
-    
+    userInput = "The user tries to :" + userInput;
     const data = {
         type: "troySacrificePrompt",
         messagesSoFar: [
@@ -42,6 +42,8 @@ export const troySacrificePrompt = async (userInput:string):Promise<number> => {
 
 //import examples and add them 
 export const onIslandFoundPrompt = async (inputs:string[], luck:number):Promise<string> => {
+    if (inputs[inputs.length - 1].includes("explore")) return "explore";
+    if (inputs[inputs.length - 1].includes("skip")) return "travel";
 
     const data = {
         type: "onIslandFoundPrompt",
@@ -61,7 +63,17 @@ export const onIslandFoundPrompt = async (inputs:string[], luck:number):Promise<
 }
 
 
+const markUserChats = (recentChatHistory:MessagesInfo[]):MessagesInfo[] => {
+    return recentChatHistory.map((v) => {
+        const v2 = {...v};
+        v2.message = v.sender === "user" ? "The user says they will attempt the following: " + v.message : v.message;
+        return v2;
+    });
+}
+
 export const onIslandExplorePrompt = async (othersOpinions:Opinions, currentScores: ScoresOfInterest, node:MyNode, recentChatHistory:MessagesInfo[], infoToPass:string, luck:number):Promise<GptExploringOutput|null> => {
+
+    recentChatHistory = markUserChats(recentChatHistory);
 
     const data = {
         type: "onIslandExplorePrompt",
@@ -76,7 +88,7 @@ export const onIslandExplorePrompt = async (othersOpinions:Opinions, currentScor
             specialInstructions:node.specialInstructions,
             citation: node.citation
         },
-        infoToPass: infoToPass
+        infoToPass: ""
     }
         
     
@@ -97,7 +109,7 @@ export const onHomeResponse = async(othersOpinions:Opinions, currentScores: Scor
     const data = {
         type: "onHomeResponse",
         luck: luck,
-        messagesSoFar: recentChatHistory,
+        messagesSoFar: markUserChats(recentChatHistory),
         othersOpinions: othersOpinions,
         currentScores: currentScores,
         node: {

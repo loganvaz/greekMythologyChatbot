@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 // import Chats from "../Chats/Chats";
 import "./Chatbot.css";
 import "../Chats/Chats.css";
@@ -6,7 +6,7 @@ import "../Chats/Chats.css";
 import {Story} from "../Helpers/Story";
 import { DynamicScoresOfInterest, MessagesInfo, Opinions, OthersOpinions, VisibleScores } from "../interfaces";
 import {allIntroMessages} from "../Chats/Chats";
-import { rmSync } from "fs";
+import {animateScroll} from "react-scroll";
 
 // import "../Helpers/StoryHelpers/SampleGeneration";
 
@@ -28,6 +28,16 @@ const Chatbot: React.FC = () => {
   const [displayableStats, setDisplayableStats] = useState<VisibleScores>(new DynamicScoresOfInterest());
   const [othersOpinions, setOthersOpinions] = useState<Opinions>(new OthersOpinions());
   const [luck, setLuck] = useState<number>(10);
+  const scrollToBottom = () => {
+    animateScroll.scrollToBottom({
+      containerId: "chatContainer",
+      duration: 2000  // scroll over 2000 milliseconds = 2 seconds
+    });
+  };
+  
+  useEffect(() => {
+    scrollToBottom();
+  }, [messagesSoFar]);
   // let messagesSoFar = allIntroMessages;
 
   
@@ -60,13 +70,18 @@ const Chatbot: React.FC = () => {
       setDisplayableStats(result.updatedScores);
       setOthersOpinions(result.opinionsArray);
       // console.log("messages so far is ", messagesSoFar);
-      let res = {
+      // let res = {
+      //   purpose: "progress story",
+      //   message: result.outputTxt,
+      // }
+      let res = result.outputTxt.split("\n").map((v) => {return {
         purpose: "progress story",
-        message: result.outputTxt,
-      }
-      // setMessagesSoFar([...messagesSoFar, {...res, sender: "bot"}]);
-      setMessagesSoFar([...msgArray, {...res, sender: "bot"}]);
-      setBotResponse({ ...res, sender: "bot" });
+        message: v,
+        sender:"bot"
+      }});
+
+      setMessagesSoFar(msgArray.concat(res));
+      setBotResponse( res[res.length-1]);
       console.log("MESSAGES SO FAR IN CHATBOT IS ", messagesSoFar);
       console.log("bot response set");
       
@@ -81,14 +96,6 @@ const Chatbot: React.FC = () => {
     });;
     
   };
-
-  const optionClick = (e: React.MouseEvent<HTMLElement>) => {
-    let option = e.currentTarget.dataset.id;
-    if (option) {
-      setNextStep(option);
-    }
-  };
-
   // event handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     
@@ -110,13 +117,13 @@ const Chatbot: React.FC = () => {
     <>
       Score Tracking
       <div className="meta-info" style={{display:"flex", fontSize:".5em"}}>
-          <div className="displayable-score">food: {displayableStats.food} / 100</div>
-          <div className="displayable-score">shipQuality: {displayableStats.shipQuality} / 100</div>
-          <div className="displayable-score">time: {displayableStats.time}</div>
-          <div className="displayable-score">numCrew: {displayableStats.numCrew}</div>
-          <div className="displayable-score">gold: {displayableStats.gold}</div>
-          <div className="displayable-score">fame: {displayableStats.fame}</div>
-          <div className="displayable-score">luck (last action): {luck}</div>
+          <div className="displayable-score">Food: {displayableStats.food} / 100</div>
+          <div className="displayable-score">Ship Strength: {displayableStats.shipQuality} / 100</div>
+          <div className="displayable-score">Time: {displayableStats.time}</div>
+          <div className="displayable-score">Crew Strength: {displayableStats.numCrew}</div>
+          <div className="displayable-score">Gold: {displayableStats.gold}</div>
+          <div className="displayable-score">Fame: {displayableStats.fame}</div>
+          <div className="displayable-score">Luck (last action): {luck}</div>
       </div>
       {/* <div className="people-of-interest">
         people of interest is weird rn
