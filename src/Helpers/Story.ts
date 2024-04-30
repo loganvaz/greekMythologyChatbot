@@ -187,7 +187,7 @@ export class Story {
         //if end condition explicitly triggered, return that 
         if (this.nodeIdx === this.nodes.length || this.wonGame) {
             return {
-                outputTxt: "Congrats you have won the game. Your final score is " + this.myScores.getFinalScore(),
+                outputTxt: "Congrats you have won the game. Your final score is " + (this.nodes.length + this.myScores.getFinalScore() - this.numSuitors*.2),
                 updatedScores: this.myScores.getVisibleScores(),
                 opinionsArray: this.othersOpinions
             }
