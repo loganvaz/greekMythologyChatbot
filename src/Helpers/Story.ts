@@ -258,6 +258,7 @@ export class Story {
         if (this.nodeIdx === this.nodes.length-1) {
             const expandedGptResponse = await onHomeResponse(this.othersOpinions, this.myScores, this.storyProgression[this.nodeIdx].here, relevantMessages, this.gptStorage, luck, this.numSuitors);
             console.log("home response is ", expandedGptResponse);
+            
             if (!expandedGptResponse) {
                 return {
                     outputTxt: "The Muses are out of services right now. Please state what you tried to do again",
@@ -265,6 +266,8 @@ export class Story {
                     opinionsArray: this.othersOpinions
                 }
             }
+            expandedGptResponse.foodChange = 0;
+            expandedGptResponse.shipQualityChange = 0;
             this.numSuitors = expandedGptResponse.numSuitorsLeft;
             console.log("num suitors is ", this.numSuitors);
             if (this.numSuitors <= 0 || expandedGptResponse.wonGame) {
