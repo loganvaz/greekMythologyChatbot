@@ -119,7 +119,7 @@ export const onHomeResponse = async(othersOpinions:Opinions, currentScores: Scor
             specialInstructions:node.specialInstructions,
             citation: node.citation
         },
-        infoToPass: infoToPass,
+        infoToPass: "",
         numSuitors: numSuitors
     }
 
