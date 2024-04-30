@@ -133,12 +133,12 @@ export class Story {
 
         //edge cost increases worse you are
         let multiple = 1;
-        if (this.myScores.shipQuality > 50) multiple *= .7;
+        if (this.myScores.shipQuality > 50) multiple *= .825;
         if (this.myScores.shipQuality <50) multiple *= 1.25; 
         else if (this.myScores.shipQuality <25) multiple *= 2;
 
-        if (this.myScores.food > 70) multiple *= .7;
-        if (this.myScores.food >= 60) multiple *= .75;
+        if (this.myScores.food > 70) multiple *= .8;
+        if (this.myScores.food >= 60) multiple *= .95;
         if (this.myScores.food <60) multiple *= 1.25; 
         else if (this.myScores.food <50) multiple *= 2;
         else if (this.myScores.food <10) multiple *= 2.25;
@@ -167,14 +167,18 @@ export class Story {
         };
 
         //mark messages thru here bc after this is only what pass to gpt
-        this.relevantMessagesIdx = messagesSoFar.length-1;
+        this.relevantMessagesIdx = messagesSoFar.length;
         this.nodeIdx += 1;
-        const isSkippable = this.nodeIdx <= this.nodes.length - 1 && !this.nodes[this.nodeIdx].entranceDescription.includes("Charybdis") && !this.nodes[this.nodeIdx].entranceDescription.includes("Sirens");
+        const isSkippable = this.getIsSkippable();
         return {
-            outputTxt: "You continue on your voyage...\n"+this.storyProgression[this.nodeIdx].here.entranceDescription +(isSkippable ? "\nWould you like to stay in your ships (stay), sail onwards (sail), or explore the island (explore)?" : "\nYou must sail past this obstacle"),
+            outputTxt: "You continue on your voyage...\n"+this.storyProgression[this.nodeIdx].here.entranceDescription +(isSkippable ? "\nWould you like to sail past this island (skip), or explore the island (explore)?" : "\nYou must sail past this obstacle (you cannot skip it)"),
             updatedScores: this.myScores.getVisibleScores(),
             opinionsArray: this.othersOpinions
         }
+    }
+
+    getIsSkippable():boolean {
+        return this.nodeIdx <= this.nodes.length - 1 && !this.nodes[this.nodeIdx].entranceDescription.includes("Charybdis") && !this.nodes[this.nodeIdx].entranceDescription.includes("Sirens");
     }
 
     async progressStory(messagesSoFar: MessagesInfo[], luck:number):Promise<StoryProgression> {
@@ -192,6 +196,7 @@ export class Story {
             console.log("Troy consideration");
             //figure out how much the user wants to sacrifice
             let amount = await troySacrificePrompt(messagesSoFar[messagesSoFar.length-1].message);
+            amount = Math.min(100, Math.max(0, amount));
             this.myScores.changeGold(-amount);
             if (amount >= 40) {
                 this.myScores.changeShipQuality(Math.min(15,Math.floor((amount-40)/2)));
@@ -208,8 +213,16 @@ export class Story {
         }
 
         //some nodes you can't avoid the entrance
-        if (this.nodes[this.nodeIdx].entranceDescription.includes("Charybdis")) this.atEntrance = false;
-        else if (this.atEntrance && this.nodeIdx !== this.nodes.length-1) {
+        if (!this.getIsSkippable()) this.atEntrance = false;
+        if (!this.getIsSkippable() && messagesSoFar[messagesSoFar.length-1].message === "skip") {
+            return {
+                outputTxt: "You cannot skip this island. You must sail past it",
+                updatedScores: this.myScores.getVisibleScores(),
+                opinionsArray: this.othersOpinions
+            }
+        }
+        else if (this.atEntrance && this.getIsSkippable()) {
+            console.log("entrance isSkippable must be False")
             //figure out what to do on the island
             let gptOutput = "";
             if (this.nodeIdx < this.nodes.length-1) gptOutput = await onIslandFoundPrompt(messagesSoFar.map(m=>m.message), luck);
@@ -230,6 +243,9 @@ export class Story {
             else { //its travel
                 return this.edgeTravel(messagesSoFar);
             }
+        }
+        else  {
+            console.log("entrance: ", this.atEntrance, "is skippable:", this.getIsSkippable(), "so far:", messagesSoFar[messagesSoFar.length-1].message);
         }
 
         //get relevant messages
@@ -319,6 +335,11 @@ export class Story {
         
         if (leftThisPlace) {
             this.atEntrance = true;
+            messagesSoFar.push({
+                message: whatHappens,
+                sender: "bot",
+                purpose: "progress story"
+            });
             return this.edgeTravel(messagesSoFar);
         }
 
