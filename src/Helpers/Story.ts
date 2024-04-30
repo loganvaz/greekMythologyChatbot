@@ -169,8 +169,9 @@ export class Story {
         //mark messages thru here bc after this is only what pass to gpt
         this.relevantMessagesIdx = messagesSoFar.length-1;
         this.nodeIdx += 1;
+        const isSkippable = this.nodeIdx <= this.nodes.length - 1 && !this.nodes[this.nodeIdx].entranceDescription.includes("Charybdis") && !this.nodes[this.nodeIdx].entranceDescription.includes("Sirens");
         return {
-            outputTxt: "You continue on your voyage...\n"+this.storyProgression[this.nodeIdx].here.entranceDescription,//+"\nWould you like to stay in your ships, travel onwards, or explore the island?",
+            outputTxt: "You continue on your voyage...\n"+this.storyProgression[this.nodeIdx].here.entranceDescription +(isSkippable ? "\nWould you like to stay in your ships (stay), sail onwards (sail), or explore the island (explore)?" : "\nYou must sail past this obstacle"),
             updatedScores: this.myScores.getVisibleScores(),
             opinionsArray: this.othersOpinions
         }
@@ -200,13 +201,10 @@ export class Story {
             this.othersOpinions.updateSinglePerson("Poseidon", amount >30 ? 2 : Math.max(-3,Math.floor((amount-20)/2)) , "due to sacrifices of " + amount + " gold");
 
             //edge travel - we don't reutnr this one tho
-            this.edgeTravel(messagesSoFar);
+            const output = this.edgeTravel(messagesSoFar);
+            output.outputTxt = `You begin your journey having sacrified ${amount} gold to the gods\n${output.outputTxt}`;
 
-            return {
-                outputTxt: `You begin your journey having sacrified ${amount} gold to the gods\n${this.nodes[this.nodeIdx].entranceDescription}`,
-                updatedScores: this.myScores.getVisibleScores(),
-                opinionsArray: this.othersOpinions
-            }
+            return output
         }
 
         //some nodes you can't avoid the entrance
