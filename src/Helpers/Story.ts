@@ -9,6 +9,7 @@ import home from "../NodeData/home.json";
 import {MyNode, NodePart, TravelCost, DynamicScoresOfInterest, OthersOpinions, MessagesInfo, VisibleScores, MyNodeInterface, GptExploringOutput} from "../interfaces";
 import {troySacrificePrompt, onIslandExplorePrompt, onIslandFoundPrompt, onHomeResponse} from "./StoryHelpers/Prompting";
 let group = [aeolus,charydbis_scyllab,hydra,lamus,lotus, sirens];
+
 // let group = [aeolus, lotus];
 console.log("group is ", group);
 
@@ -178,7 +179,7 @@ export class Story {
     }
 
     getIsSkippable():boolean {
-        return this.nodeIdx <= this.nodes.length - 1 && !this.nodes[this.nodeIdx].entranceDescription.includes("Charybdis") && !this.nodes[this.nodeIdx].entranceDescription.includes("Sirens");
+        return this.nodeIdx < this.nodes.length - 1 && !this.nodes[this.nodeIdx].entranceDescription.includes("Charybdis") && !this.nodes[this.nodeIdx].entranceDescription.includes("Sirens");
     }
 
     async progressStory(messagesSoFar: MessagesInfo[], luck:number):Promise<StoryProgression> {
