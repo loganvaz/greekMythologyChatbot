@@ -18,9 +18,9 @@ export class OthersOpinions implements Opinions {
     whys:string[]
 
     constructor() {
-        this.entities = ["crew", "Poseidon"];
-        this.opinions = [10, 0];
-        this.whys = ["you are generally well liked by the crew", "doesn't have an opinion of you yet"];
+        this.entities = ["crew", "Poseidon", "Other Gods"];
+        this.opinions = [10, 0, 0];
+        this.whys = ["you are generally well liked by the crew", "doesn't have an opinion of you yet", "doesn't have an opinion of you yet"];
     }
 
     updateSinglePerson(person:string, newScore:number, whyAppend:string) {
@@ -47,9 +47,11 @@ export class OthersOpinions implements Opinions {
                 this.opinions[matchIdx] = thisScore;;
             }
             else {
-                this.entities.push(entityName);
-                this.opinions.push(thisScore);
-                this.whys.push(thisWhy);
+                //I'm removing this for now - GPT retunrs too much which I think is confusing the chatbot.
+                ;
+                // this.entities.push(entityName);
+                // this.opinions.push(thisScore);
+                // this.whys.push(thisWhy);
             }
         });
     }

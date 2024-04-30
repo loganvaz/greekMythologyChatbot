@@ -172,7 +172,7 @@ export class Story {
         this.nodeIdx += 1;
         const isSkippable = this.getIsSkippable();
         return {
-            outputTxt: "You continue on your voyage...\n"+this.storyProgression[this.nodeIdx].here.entranceDescription +(isSkippable ? "\nWould you like to sail past this island (skip), or explore the island (explore)?" : "\nYou must sail past this obstacle (you cannot skip it)"),
+            outputTxt: "You continue on your voyage...\n"+this.storyProgression[this.nodeIdx].here.entranceDescription +(isSkippable ? "\nWould you like to sail past this island (skip), or explore the island (explore)?" : this.nodeIdx < this.nodes.length -1 ? "\nYou must sail past this obstacle (you cannot skip it)" : ""),
             updatedScores: this.myScores.getVisibleScores(),
             opinionsArray: this.othersOpinions
         }
@@ -290,7 +290,7 @@ export class Story {
         
 
         //extract what we want to modify from the gpt response
-        const {crewStrength, timeChange, toldFriendlyPeopleOfDeeds, additionalDataToPassOn,famousDeedScore, goldGain, isAlive,leftThisPlace, peopleOfInterest,shipQualityChange, whatHappens, foodChange } = gptResponse
+        const {crewStrength, timeChange, toldFriendlyPeopleOfDeeds, additionalDataToPassOn,famousDeedScore, goldGain, isAlive,leftThisPlace, peopleOfInterest,shipQualityChange, whatHappens, foodChange } = gptResponse;
 
         this.othersOpinions.updateEntities(peopleOfInterest.opinions, peopleOfInterest.entities , peopleOfInterest.whys);
         this.gptStorage += "at time " + this.myScores.time + ", " + additionalDataToPassOn + ";";
